@@ -8,6 +8,33 @@
 <body>
     
 
+
+
+
+
+
+
     
 </body>
 </html>
+
+<script>
+
+
+// replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+$json = file_get_contents('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=JRINTCT4SARRL57W');
+
+$data = json_decode($json,true);
+
+print_r($data);
+
+exit;
+
+
+
+
+
+
+</script>
+
+
