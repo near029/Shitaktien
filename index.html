@@ -3,25 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coinlayer API Test</title>
+    <title>Krypto & Aktien Kurse</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #chart-container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Krypto-Kursanzeige</h1>
-    <div id="btc"></div>
+    <h1>Krypto & Aktien Kursanzeige</h1>
+
+    <label for="search">Suchbegriff (Coin oder Aktie):</label>
+    <input type="text" id="search" placeholder="z.B. BTC oder AAPL">
+    <button onclick="searchSymbol()">Suchen</button>
+
+    <div id="info"></div>
+
+    <div id="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+    let chart;
+
+    function searchSymbol() {
+        const symbol = document.getElementById("search").value.toUpperCase();
+
+        if (!symbol) return;
+
+        // Entscheide, ob es Krypto oder Aktie ist
+        if (/^[A-Z]{2,5}$/.test(symbol)) {
+            // Wenn symbol wie BTC, ETH oder AAPL aussieht
+            if (symbol.length <= 4) {
+                fetchCrypto(symbol);
+            } else {
+                fetchStock(symbol);
+            }
+        }
+    }
+
+    function fetchCrypto(symbol) {
+        const url = `https://api.coinlayer.com/live?access_key=aa3ba4393cbcbd708cfe2fb5192cf6be&target=EUR`;
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const rate = data.rates[symbol];
+                if (!rate) throw new Error("Coin nicht gefunden");
+                showInfo(`${symbol} Kurs: ${rate} EUR`);
+                showChart([symbol], [rate], `${symbol} in EUR`);
+            })
+            .catch(err => showInfo("Fehler: " + err.message));
+    }
+
+    function fetchStock(symbol) {
+        const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=WMCAQ0DSRYSB74GP`;
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const series = data["Time Series (Daily)"];
+                if (!series) throw new Error("Aktie nicht gefunden oder Limit erreicht");
+                const dates = Object.keys(series).slice(0, 10).reverse();
+                const prices = dates.map(date => parseFloat(series[date]["4. close"]));
+                showInfo(`${symbol} Schlusskurs der letzten 10 Tage`);
+                showChart(dates, prices, `${symbol} Aktienkurs`);
+            })
+            .catch(err => showInfo("Fehler: " + err.message));
+    }
+
+    function showInfo(text) {
+        document.getElementById("info").textContent = text;
+    }
+
+    function showChart(labels, data, labelText) {
+        const ctx = document.getElementById('chart').getContext('2d');
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: labelText,
+                    data: data,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+    </script>
 </body>
 </html>
-
-<script>
-let key = "https://api.coinlayer.com/live?access_key=aa3ba4393cbcbd708cfe2fb5192cf6be";
-
-fetch(key)
-    .then(response => response.json())
-    .then(data => {
-        console.log(data); // Debug-Ausgabe
-
-        // Beispiel: Zeige Bitcoin-Kurs in EUR
-        const btcPrice = data.rates.BTC;
-        document.getElementById("btc").textContent = "BTC-Kurs: " + btcPrice + " EUR";
-    })
-    .catch(error => console.error("Fehler:", error));
-</script>
