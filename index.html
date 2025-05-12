@@ -23,6 +23,13 @@
         #info {
             margin-top: 20px;
             font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .up {
+            color: green;
+        }
+        .down {
+            color: red;
         }
     </style>
 </head>
@@ -56,51 +63,54 @@
     <script>
     let chart;
 
-    function searchSymbol() {
-        const symbol = document.getElementById("search").value.toUpperCase();
+    async function searchSymbol() {
+        const symbolInput = document.getElementById("search").value.trim().toLowerCase();
         const timespan = document.getElementById("timespan").value;
 
-        if (!symbol) return;
+        if (!symbolInput) return;
 
-        if (/^[A-Z]{2,5}$/.test(symbol)) {
-            if (symbol.length <= 4) {
-                fetchCrypto(symbol.toLowerCase(), timespan);
+        try {
+            const coins = await fetch("https://api.coingecko.com/api/v3/coins/list").then(r => r.json());
+            const coin = coins.find(c => c.symbol.toLowerCase() === symbolInput);
+
+            if (coin) {
+                return fetchCrypto(coin.id, symbolInput.toUpperCase(), timespan);
             } else {
-                fetchStock(symbol, timespan);
+                return fetchStock(symbolInput.toUpperCase(), timespan);
             }
+        } catch (err) {
+            showInfo("Fehler beim Laden: " + err.message);
         }
     }
 
-    function fetchCrypto(symbol, timespan) {
-        let days;
-        if (timespan === "1d") days = 1;
-        else if (timespan === "1m") days = 30;
-        else if (timespan === "1y") days = 365;
-        else days = 10;
+    function fetchCrypto(coinId, displaySymbol, timespan) {
+        let days = timespan === "1d" ? 1 : timespan === "1m" ? 30 : 365;
 
-        const url = `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=eur&days=${days}`;
+        Promise.all([
+            fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=eur&days=${days}`).then(r => r.json()),
+            fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`).then(r => r.json())
+        ])
+        .then(([chartData, coinData]) => {
+            if (!chartData.prices) throw new Error("Marktdaten nicht gefunden");
 
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.prices) throw new Error("Coin nicht gefunden");
-                const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
-                const values = data.prices.map(p => p[1]);
+            const labels = chartData.prices.map(p => new Date(p[0]).toLocaleDateString());
+            const values = chartData.prices.map(p => p[1]);
+            const currentPrice = coinData.market_data.current_price.eur;
+            const marketCap = coinData.market_data.market_cap.eur;
+            const volume = coinData.market_data.total_volume.eur;
+            const change = coinData.market_data.price_change_percentage_24h;
 
-                showInfo(`${symbol.toUpperCase()} Kursentwicklung (letzte ${days} Tage)`);
-                showChart(labels, values, `${symbol.toUpperCase()} in EUR`);
-            })
-            .catch(err => showInfo("Fehler: " + err.message));
+            const changeClass = change >= 0 ? 'up' : 'down';
+            const arrow = change >= 0 ? '🔼' : '🔽';
+
+            showInfo(`${displaySymbol} Kurs: ${currentPrice.toFixed(2)} EUR | Marktkapitalisierung: ${marketCap.toLocaleString()} EUR | Volumen (24h): ${volume.toLocaleString()} EUR | <span class="${changeClass}">Veränderung (24h): ${arrow} ${change.toFixed(2)}%</span>`);
+            showChart(labels, values, `${displaySymbol} in EUR`);
+        })
+        .catch(err => showInfo("Fehler: " + err.message));
     }
 
     function fetchStock(symbol, timespan) {
-        let resolution = "1d";
-        let range = 1;
-        if (timespan === "1m") {
-            range = 30;
-        } else if (timespan === "1y") {
-            range = 365;
-        }
+        let range = timespan === "1m" ? 30 : timespan === "1y" ? 365 : 1;
 
         const endDate = new Date();
         const startDate = new Date(endDate);
@@ -110,22 +120,32 @@
         const to = endDate.toISOString().split("T")[0];
 
         const url = `https://api.finage.co.uk/history/stock/${symbol}?from=${from}&to=${to}&resolution=1d&apikey=API_KEY2a6EUSQDJ7LSW8CITQENL4B7N3NSUMPA`;
+        const lastPriceUrl = `https://api.finage.co.uk/last/stock/${symbol}?apikey=API_KEY2a6EUSQDJ7LSW8CITQENL4B7N3NSUMPA`;
 
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.results || data.results.length === 0) throw new Error("Keine historischen Daten gefunden");
-                const labels = data.results.map(p => new Date(p.date).toLocaleDateString());
-                const prices = data.results.map(p => p.close);
+        Promise.all([
+            fetch(url).then(res => res.json()),
+            fetch(lastPriceUrl).then(res => res.json())
+        ])
+        .then(([data, last]) => {
+            if (!data.results || data.results.length === 0) throw new Error("Keine historischen Daten gefunden");
 
-                showInfo(`${symbol} Kursverlauf (${timespan})`);
-                showChart(labels, prices, `${symbol} Aktienkurs`);
-            })
-            .catch(err => showInfo("Fehler: " + err.message));
+            const labels = data.results.map(p => new Date(p.date).toLocaleDateString());
+            const prices = data.results.map(p => p.close);
+            const currentPrice = last.price;
+            const change = last.change;
+            const percent = last.percent;
+
+            const changeClass = change >= 0 ? 'up' : 'down';
+            const arrow = change >= 0 ? '🔼' : '🔽';
+
+            showInfo(`${symbol} Kurs: ${currentPrice.toFixed(2)} USD | <span class="${changeClass}">Veränderung: ${arrow} ${change.toFixed(2)} USD (${percent.toFixed(2)}%)</span>`);
+            showChart(labels, prices, `${symbol} Aktienkurs`);
+        })
+        .catch(err => showInfo("Fehler: " + err.message));
     }
 
-    function showInfo(text) {
-        document.getElementById("info").textContent = text;
+    function showInfo(html) {
+        document.getElementById("info").innerHTML = html;
     }
 
     function showChart(labels, data, labelText) {
