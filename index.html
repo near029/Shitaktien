@@ -80,7 +80,7 @@
     }
 
     function fetchStock(symbol, timespan) {
-        const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=WMCAQ0DSRYSB74GP`;
+        const url = `https://api.finage.co.uk/last/stock/AAPL?apikey=API_KEY2a6EUSQDJ7LSW8CITQENL4B7N3NSUMPA`;
         fetch(url)
             .then(res => res.json())
             .then(data => {
