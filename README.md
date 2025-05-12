@@ -1,0 +1,2 @@
+# Shitaktien
+istaversucheineaktienwebsitezumachenaberwirdnix
