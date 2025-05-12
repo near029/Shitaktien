@@ -62,6 +62,7 @@
 
     <script>
     let chart;
+    const usdToEurRate = 0.92; // Fester Wechselkurs von USD zu EUR (z.B. 1 USD = 0.92 EUR)
 
     async function searchSymbol() {
         const symbolInput = document.getElementById("search").value.trim().toLowerCase();
@@ -131,14 +132,14 @@
 
             const labels = data.results.map(p => new Date(p.date).toLocaleDateString());
             const prices = data.results.map(p => p.close);
-            const currentPrice = last.price;
+            const currentPrice = last.price * usdToEurRate; // USD in EUR umrechnen
             const change = last.change;
             const percent = last.percent;
 
             const changeClass = change >= 0 ? 'up' : 'down';
             const arrow = change >= 0 ? '🔼' : '🔽';
 
-            showInfo(`${symbol} Kurs: ${currentPrice.toFixed(2)} USD | <span class="${changeClass}">Veränderung: ${arrow} ${change.toFixed(2)} USD (${percent.toFixed(2)}%)</span>`);
+            showInfo(`${symbol} Kurs: ${currentPrice.toFixed(2)} EUR | <span class="${changeClass}">Veränderung: ${arrow} ${change.toFixed(2)} USD (${percent.toFixed(2)}%)</span>`);
             showChart(labels, prices, `${symbol} Aktienkurs`);
         })
         .catch(err => showInfo("Fehler: " + err.message));
