@@ -63,6 +63,7 @@
     <script>
     let chart;
     const usdToEurRate = 0.92; // Fester Wechselkurs von USD zu EUR (z.B. 1 USD = 0.92 EUR)
+    const COINMARKETCAP_API_KEY = 'YOUR_COINMARKETCAP_API_KEY'; // Replace with your API key
 
     async function searchSymbol() {
         const symbolInput = document.getElementById("search").value.trim().toLowerCase();
@@ -71,23 +72,31 @@
         if (!symbolInput) return;
 
         try {
+            // Try CoinGecko first (for crypto)
             const coins = await fetch("https://api.coingecko.com/api/v3/coins/list").then(r => r.json());
             const coin = coins.find(c => c.symbol.toLowerCase() === symbolInput);
 
             if (coin) {
-                return fetchCrypto(coin.id, symbolInput.toUpperCase(), timespan);
+                try {
+                    await fetchCrypto(coin.id, symbolInput.toUpperCase(), timespan);
+                } catch (geckoError) {
+                    console.warn("CoinGecko failed, trying CoinMarketCap...");
+                    await fetchCryptoViaCoinMarketCap(symbolInput.toUpperCase(), timespan);
+                }
             } else {
-                return fetchStock(symbolInput.toUpperCase(), timespan);
+                // Fallback to stocks (Finage API)
+                await fetchStock(symbolInput.toUpperCase(), timespan);
             }
         } catch (err) {
             showInfo("Fehler beim Laden: " + err.message);
         }
     }
 
+    // Original CoinGecko fetch function
     function fetchCrypto(coinId, displaySymbol, timespan) {
         let days = timespan === "1d" ? 1 : timespan === "1m" ? 30 : 365;
 
-        Promise.all([
+        return Promise.all([
             fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=eur&days=${days}`).then(r => r.json()),
             fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`).then(r => r.json())
         ])
@@ -106,10 +115,57 @@
 
             showInfo(`${displaySymbol} Kurs: ${currentPrice.toFixed(2)} EUR | Marktkapitalisierung: ${marketCap.toLocaleString()} EUR | Volumen (24h): ${volume.toLocaleString()} EUR | <span class="${changeClass}">Veränderung (24h): ${arrow} ${change.toFixed(2)}%</span>`);
             showChart(labels, values, `${displaySymbol} in EUR`);
-        })
-        .catch(err => showInfo("Fehler: " + err.message));
+        });
     }
 
+    // New CoinMarketCap fetch function (fallback)
+    async function fetchCryptoViaCoinMarketCap(symbol, timespan) {
+        try {
+            // Get CoinMarketCap ID for the symbol
+            const listingsResponse = await fetch(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/map?symbol=${symbol}`, {
+                headers: {
+                    'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY,
+                    'Accept': 'application/json'
+                }
+            });
+            const listingsData = await listingsResponse.json();
+            
+            if (!listingsData.data || listingsData.data.length === 0) {
+                throw new Error("Symbol nicht gefunden");
+            }
+
+            const coinId = listingsData.data[0].id;
+            
+            // Fetch historical data (Note: CoinMarketCap's free plan has limited historical endpoints)
+            const quoteResponse = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?id=${coinId}&convert=EUR`, {
+                headers: {
+                    'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY,
+                    'Accept': 'application/json'
+                }
+            });
+            const quoteData = await quoteResponse.json();
+            
+            const currentPrice = quoteData.data[coinId].quote.EUR.price;
+            const marketCap = quoteData.data[coinId].quote.EUR.market_cap;
+            const volume = quoteData.data[coinId].quote.EUR.volume_24h;
+            const change = quoteData.data[coinId].quote.EUR.percent_change_24h;
+
+            // For chart data, we'll use CoinGecko's free API (since CMC's historical data is limited)
+            const chartData = await fetch(`https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/market_chart?vs_currency=eur&days=30`).then(r => r.json());
+            const labels = chartData.prices.map(p => new Date(p[0]).toLocaleDateString());
+            const values = chartData.prices.map(p => p[1]);
+
+            const changeClass = change >= 0 ? 'up' : 'down';
+            const arrow = change >= 0 ? '🔼' : '🔽';
+
+            showInfo(`${symbol} Kurs: ${currentPrice.toFixed(2)} EUR | Marktkapitalisierung: ${marketCap.toLocaleString()} EUR | Volumen (24h): ${volume.toLocaleString()} EUR | <span class="${changeClass}">Veränderung (24h): ${arrow} ${change.toFixed(2)}%</span>`);
+            showChart(labels, values, `${symbol} in EUR`);
+        } catch (err) {
+            throw new Error("CoinMarketCap: " + err.message);
+        }
+    }
+
+    // Original stock fetch function (Finage API)
     function fetchStock(symbol, timespan) {
         let range = timespan === "1m" ? 30 : timespan === "1y" ? 365 : 1;
 
