@@ -2,8 +2,7 @@
 istaversucheineaktienwebsitezumachenaberwirdnix
 
 Rest api herkunf:
-https://twelvedata.com/market-data
 
-https://twelvedata.com/
 
-https://www.alphavantage.co/
+durch langes und schmerzhatftes denken haben wir entschieden die aktienwebsite zu schliessen mit bedauern muss ich den weiteren betrieb der website 
+
