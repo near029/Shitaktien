@@ -182,15 +182,12 @@
 
     <!-- Bootstrap & Spotify Web Playback SDK -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
     <!-- App Script -->
     <script>
-        // Configuration - Replace with your Spotify Client ID
-        const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f';
-        const REDIRECT_URI = window.location.href.includes('localhost') 
-            ? 'http://localhost:8000' 
-            : 'YOUR_PRODUCTION_URL';
+        // Configuration - MUST match exactly what's in your Spotify Dashboard
+        const CLIENT_ID = 'YOUR_SPOTIFY_CLIENT_ID'; // Replace with your client ID
+        const REDIRECT_URI = 'http://localhost:8000'; // Must match exactly what's in Spotify Dashboard
         const SCOPE = 'user-top-read user-read-private user-read-email';
 
         // DOM Elements
@@ -212,7 +209,7 @@
         const topArtistsContainer = document.getElementById('topArtistsContainer');
         const topTracksContainer = document.getElementById('topTracksContainer');
 
-        // Check for access token in URL hash
+        // Check for access token in URL hash when page loads
         function checkForAccessToken() {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
@@ -224,7 +221,7 @@
                 localStorage.setItem('spotify_access_token', accessToken);
                 localStorage.setItem('spotify_token_expiry', Date.now() + (expiresIn * 1000));
                 
-                // Clean URL
+                // Clean URL by removing hash
                 window.history.replaceState({}, document.title, window.location.pathname);
                 
                 // Load user data
@@ -234,8 +231,20 @@
 
         // Initialize Spotify login
         function initSpotifyLogin() {
-            const loginUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPE)}&show_dialog=true`;
-            window.location.href = loginUrl;
+            const authUrl = new URL('https://accounts.spotify.com/authorize');
+            const params = {
+                client_id: CLIENT_ID,
+                response_type: 'token',
+                redirect_uri: REDIRECT_URI,
+                scope: SCOPE,
+                show_dialog: true
+            };
+
+            Object.keys(params).forEach(key => {
+                authUrl.searchParams.append(key, params[key]);
+            });
+
+            window.location.href = authUrl.toString();
         }
 
         // Load user data from Spotify API
@@ -288,8 +297,10 @@
                 userAvatar.src = profile.images[0].url;
                 profileImage.src = profile.images[0].url;
             } else {
-                userAvatar.src = 'https://via.placeholder.com/150';
-                profileImage.src = 'https://via.placeholder.com/150';
+                // Use placeholder if no image
+                const placeholder = 'https://via.placeholder.com/150';
+                userAvatar.src = placeholder;
+                profileImage.src = placeholder;
             }
         }
 
