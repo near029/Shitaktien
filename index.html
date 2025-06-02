@@ -1,24 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Spotify Playlists Fetcher</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #121212; color: #fff; text-align: center; padding: 2rem; }
-    button { background: #1DB954; color: white; border: none; padding: 1rem 2rem; font-size: 1rem; cursor: pointer; }
-    button:hover { background: #1ed760; }
-    pre { text-align: left; margin-top: 2rem; background: #1e1e1e; padding: 1rem; border-radius: 5px; max-height: 500px; overflow: auto; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spotify Playlist Fetcher</title>
 </head>
 <body>
-  <h1>Spotify Playlist Exporter</h1>
   <button id="loginBtn">Login with Spotify</button>
-  <pre id="output"></pre>
 
   <script>
-    const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // Replace with your Spotify client ID
-    const REDIRECT_URI = 'https://near029.github.io/Shitaktien/bwo.html';
-    const SCOPE = 'playlist-read-private';
+    const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // Replace with your Spotify App Client ID
+    const REDIRECT_URI = window.location.origin + '/bwo.html';
+    const SCOPE = 'playlist-read-private playlist-read-collaborative';
 
     document.getElementById('loginBtn').addEventListener('click', () => {
       const authUrl = new URL('https://accounts.spotify.com/authorize');
@@ -26,39 +19,8 @@
       authUrl.searchParams.set('response_type', 'token');
       authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
       authUrl.searchParams.set('scope', SCOPE);
+      authUrl.searchParams.set('show_dialog', 'true');
       window.location.href = authUrl.toString();
-    });
-
-    function getAccessTokenFromUrl() {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      return params.get('access_token');
-    }
-
-    async function fetchPlaylists(token) {
-      try {
-        const res = await fetch('https://api.spotify.com/v1/me/playlists', {
-          headers: { Authorization: 'Bearer ' + token }
-        });
-        const data = await res.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-        // Optional: save JSON file locally
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "spotify_playlists.json";
-        a.click();
-      } catch (err) {
-        document.getElementById('output').textContent = 'Error fetching playlists: ' + err;
-      }
-    }
-
-    window.addEventListener('load', () => {
-      const token = getAccessTokenFromUrl();
-      if (token) {
-        history.replaceState({}, document.title, window.location.pathname); // clean URL
-        fetchPlaylists(token);
-      }
     });
   </script>
 </body>
