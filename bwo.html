@@ -364,7 +364,10 @@
         counts: [6, 4],
       },
     };
-
+// Funktion für Achsenfarbe je nach Modus
+function getAxisColor() {
+  return document.body.classList.contains('light-mode') ? '#363636' : '#1DB954'; // dunkelgrau oder Spotify-Grün
+}
     // Chart initialisieren
     const ctx = document.getElementById('genreChart').getContext('2d');
     let genreChart = new Chart(ctx, {
@@ -374,8 +377,8 @@
         datasets: [{
           label: 'Anzahl gespielter Tracks',
           data: genresData.all.counts,
-          backgroundColor: 'rgba(29, 185, 84, 0.7)',
-          borderColor: 'rgba(29, 185, 84, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 1)',
+          borderColor: 'rgba(54, 162, 235, 1)',
           borderWidth: 1,
           borderRadius: 5,
         }],
@@ -387,7 +390,7 @@
           y: {
             beginAtZero: true,
             ticks: {
-              color: 'var(--spotify-green)',
+              color: getAxisColor(),
               stepSize: 5,
             },
             grid: {
@@ -396,7 +399,7 @@
           },
           x: {
             ticks: {
-              color: 'var(--spotify-green)',
+              color: getAxisColor(),
             },
             grid: {
               color: 'transparent',
@@ -406,15 +409,15 @@
         plugins: {
           legend: {
             labels: {
-              color: 'var(--spotify-green)',
+              color: getAxisColor(),
               font: { size: 14 },
             },
           },
-          tooltip: {
-            backgroundColor: '#222',
-            titleColor: 'var(--spotify-green)',
-            bodyColor: 'var(--spotify-green)',
-          },
+      tooltip: {
+        backgroundColor: '#222',
+        titleColor: '#36A2EB', // Blau passend zur Farbe
+        bodyColor: '#36A2EB',
+      },
         },
       },
     });
