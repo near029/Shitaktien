@@ -27,8 +27,76 @@
       background-color: var(--dark-bg);
       color: var(--spotify-green);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 2rem;
+      margin: 0;
+      padding: 0;
       transition: background-color 0.3s, color 0.3s;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: var(--dark-card);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.7);
+      z-index: 1100;
+    }
+
+    .sidebar h2 {
+      color: var(--spotify-green);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      user-select: none;
+    }
+
+    .sidebar a,
+    .sidebar button,
+    .sidebar select {
+      color: var(--spotify-green);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: left;
+      width: 100%;
+      padding: 0.5rem 0;
+      border-radius: 0.3rem;
+      transition: background-color 0.2s;
+    }
+
+    .sidebar a:hover,
+    .sidebar button:hover,
+    .sidebar select:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+      text-decoration: none;
+    }
+
+    .sidebar select {
+      color: var(--spotify-green);
+      background-color: transparent;
+      border: 1px solid var(--spotify-green);
+      padding: 0.4rem;
+      border-radius: 0.3rem;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    /* Container for main content */
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      flex: 1;
     }
 
     h1, h2, h3 {
@@ -53,6 +121,14 @@
 
     a.btn-back {
       margin-bottom: 2rem;
+      color: var(--spotify-green);
+      border-color: var(--spotify-green);
+    }
+
+    a.btn-back:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+      text-decoration: none;
     }
 
     .fade-in {
@@ -101,7 +177,7 @@
       border-radius: 9999px;
       cursor: pointer;
       font-weight: bold;
-      z-index: 1050;
+      z-index: 1150;
       transition: background-color 0.3s;
     }
 
@@ -138,9 +214,30 @@
       color: var(--spotify-light);
     }
 
-    /* Responsive tweaks if needed */
-    @media (max-width: 575px) {
-      body {
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        padding: 1rem 1rem 1rem 1rem;
+        flex-direction: row;
+        gap: 1rem;
+        overflow-x: auto;
+      }
+      .sidebar h2 {
+        display: none;
+      }
+      .sidebar a,
+      .sidebar button,
+      .sidebar select {
+        flex: 1 0 auto;
+        text-align: center;
+        padding: 0.5rem;
+      }
+      .main-content {
+        margin-left: 0;
         padding: 1rem;
       }
     }
@@ -150,37 +247,26 @@
   <!-- Dark Mode Toggle -->
   <button id="darkModeToggle" aria-label="Toggle Dark Mode">🌞</button>
 
-  <div class="container fade-in">
-    <!-- Dropdown Auswahl -->
-    <div class="d-flex justify-content-start mb-4 flex-wrap gap-2">
-      <div class="dropdown">
-        <button
-          class="btn btn-success dropdown-toggle"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          Auswahl
-        </button>
-        <ul class="dropdown-menu bg-dark border-0">
-          <li><a class="dropdown-item text-success" href="#">🎵 Lieblingskünstler</a></li>
-          <li><a class="dropdown-item text-success" href="#">📈 Genre-Trends</a></li>
-          <li><a class="dropdown-item text-success" href="#">⏱ Hörgewohnheiten</a></li>
-          <li><a class="dropdown-item text-success" href="#">📂 Datenexport</a></li>
-        </ul>
-      </div>
+  <!-- Sidebar -->
+  <nav class="sidebar" aria-label="Hauptnavigation">
+    <h2>Menü</h2>
+    <a href="#" tabindex="0">🎵 Lieblingskünstler</a>
+    <a href="#" tabindex="0">📈 Genre-Trends</a>
+    <a href="#" tabindex="0">⏱ Hörgewohnheiten</a>
+    <a href="#" tabindex="0">📂 Datenexport</a>
 
-      <!-- Genre Filter -->
-      <select class="form-select w-auto" id="genreFilter" aria-label="Genre Filter">
-        <option value="all" selected>Alle Genres</option>
-        <option value="pop">Pop</option>
-        <option value="rock">Rock</option>
-        <option value="hiphop">Hip-Hop</option>
-        <option value="electronic">Electronic</option>
-        <option value="classical">Klassik</option>
-      </select>
-    </div>
+    <select id="genreFilter" aria-label="Genre Filter" title="Genre auswählen">
+      <option value="all" selected>Alle Genres</option>
+      <option value="pop">Pop</option>
+      <option value="rock">Rock</option>
+      <option value="hiphop">Hip-Hop</option>
+      <option value="electronic">Electronic</option>
+      <option value="classical">Klassik</option>
+    </select>
+  </nav>
 
+  <!-- Hauptinhalt -->
+  <main class="main-content">
     <a href="index.html" class="btn btn-outline-light btn-back">
       <i class="bi bi-arrow-left"></i> Zurück zur Startseite
     </a>
@@ -224,7 +310,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -263,58 +349,81 @@
         counts: [15, 10, 15],
       },
       rock: {
-        labels: ['Rock 1', 'Rock 2'],
-        counts: [10, 15],
+        labels: ['Rock 1', 'Rock 2', 'Rock 3'],
+        counts: [10, 8, 7],
       },
       hiphop: {
-        labels: ['Hip-Hop 1', 'Hip-Hop 2', 'Hip-Hop 3'],
-        counts: [5, 7, 3],
+        labels: ['Hip-Hop 1', 'Hip-Hop 2'],
+        counts: [9, 6],
       },
       electronic: {
-        labels: ['Electronic 1', 'Electronic 2'],
-        counts: [6, 4],
+        labels: ['Electronic 1', 'Electronic 2', 'Electronic 3'],
+        counts: [5, 3, 2],
       },
       classical: {
-        labels: ['Klassik 1', 'Klassik 2', 'Klassik 3'],
-        counts: [3, 4, 3],
+        labels: ['Klassik 1', 'Klassik 2'],
+        counts: [6, 4],
       },
     };
 
+    // Chart initialisieren
     const ctx = document.getElementById('genreChart').getContext('2d');
-
     let genreChart = new Chart(ctx, {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: genresData.all.labels,
-        datasets: [
-          {
-            label: 'Anzahl der Songs',
-            data: genresData.all.counts,
-            backgroundColor: [
-              '#1DB954',
-              '#17a2b8',
-              '#ffc107',
-              '#6f42c1',
-              '#fd7e14',
-            ],
-            borderWidth: 1,
-          },
-        ],
+        datasets: [{
+          label: 'Anzahl gespielter Tracks',
+          data: genresData.all.counts,
+          backgroundColor: 'rgba(29, 185, 84, 0.7)',
+          borderColor: 'rgba(29, 185, 84, 1)',
+          borderWidth: 1,
+          borderRadius: 5,
+        }],
       },
       options: {
         responsive: true,
+        animation: { duration: 600 },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: 'var(--spotify-green)',
+              stepSize: 5,
+            },
+            grid: {
+              color: '#333',
+            },
+          },
+          x: {
+            ticks: {
+              color: 'var(--spotify-green)',
+            },
+            grid: {
+              color: 'transparent',
+            },
+          },
+        },
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--spotify-green)' } },
+          legend: {
+            labels: {
+              color: 'var(--spotify-green)',
+              font: { size: 14 },
+            },
+          },
+          tooltip: {
+            backgroundColor: '#222',
+            titleColor: 'var(--spotify-green)',
+            bodyColor: 'var(--spotify-green)',
+          },
         },
       },
     });
 
-    // Genre Filter Logik
+    // Genre Filter Listener
     const genreFilter = document.getElementById('genreFilter');
-
     genreFilter.addEventListener('change', () => {
       const selected = genreFilter.value;
-
       const data = genresData[selected] || genresData.all;
 
       genreChart.data.labels = data.labels;
