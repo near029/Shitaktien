@@ -1,450 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Spotify Stats</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --spotify-green: #1DB954;
-            --spotify-dark: #121212;
-            --spotify-light-dark: #181818;
-            --spotify-gray: #282828;
-        }
-        body {
-            background-color: var(--spotify-dark);
-            color: white;
-            min-height: 100vh;
-        }
-        .navbar {
-            background-color: black;
-            padding: 15px 0;
-        }
-        .card {
-            background-color: var(--spotify-light-dark);
-            border: none;
-            transition: transform 0.2s;
-            margin-bottom: 20px;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            background-color: var(--spotify-gray);
-        }
-        .list-group-item {
-            background-color: var(--spotify-gray);
-            color: white;
-            border-color: #333;
-        }
-        .img-thumbnail {
-            background-color: var(--spotify-gray);
-            border-color: #333;
-        }
-        .btn-spotify {
-            background-color: var(--spotify-green);
-            border: none;
-            color: white;
-        }
-        .btn-spotify:hover {
-            background-color: #1ed760;
-            color: white;
-        }
-        .nav-tabs .nav-link {
-            color: #b3b3b3;
-            border: none;
-        }
-        .nav-tabs .nav-link.active {
-            color: white;
-            background-color: transparent;
-            border-bottom: 2px solid var(--spotify-green);
-        }
-        audio {
-            width: 100%;
-            background-color: var(--spotify-gray);
-            border-radius: 5px;
-        }
-        audio::-webkit-media-controls-panel {
-            background-color: var(--spotify-gray);
-        }
-        #loadingView {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Spotify Playlists Fetcher</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #121212; color: #fff; text-align: center; padding: 2rem; }
+    button { background: #1DB954; color: white; border: none; padding: 1rem 2rem; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #1ed760; }
+    pre { text-align: left; margin-top: 2rem; background: #1e1e1e; padding: 1rem; border-radius: 5px; max-height: 500px; overflow: auto; }
+  </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand text-success" href="#">
-                <i class="fab fa-spotify me-2"></i>My Spotify Stats
-            </a>
-            <div id="authSection">
-                <button id="loginBtn" class="btn btn-spotify">
-                    <i class="fas fa-sign-in-alt me-2"></i>Login
-                </button>
-                <div id="userDropdown" class="dropdown" style="display:none;">
-                    <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                        <img id="userAvatar" src="" width="25" height="25" class="rounded-circle me-2">
-                        <span id="userName"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+  <h1>Spotify Playlist Exporter</h1>
+  <button id="loginBtn">Login with Spotify</button>
+  <pre id="output"></pre>
 
-    <div class="container my-5">
-        <!-- Loading View -->
-        <div id="loadingView" class="text-center py-5">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-3">Loading your Spotify data...</p>
-        </div>
+  <script>
+    const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // Replace with your Spotify client ID
+    const REDIRECT_URI = window.location.href;
+    const SCOPE = 'playlist-read-private';
 
-        <!-- Login View -->
-        <div id="loginView" class="text-center py-5">
-            <h1 class="display-4 mb-4">Your Spotify Listening Statistics</h1>
-            <p class="lead mb-5">Discover your top artists, tracks, and more</p>
-            <button id="mainLoginBtn" class="btn btn-spotify btn-lg px-5 py-3">
-                <i class="fab fa-spotify me-2"></i>Connect with Spotify
-            </button>
-        </div>
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const authUrl = new URL('https://accounts.spotify.com/authorize');
+      authUrl.searchParams.set('client_id', CLIENT_ID);
+      authUrl.searchParams.set('response_type', 'token');
+      authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
+      authUrl.searchParams.set('scope', SCOPE);
+      window.location.href = authUrl.toString();
+    });
 
-        <!-- Stats View -->
-        <div id="statsView" style="display:none;">
-            <div class="d-flex justify-content-end mb-3">
-                <select id="timeRangeSelect" class="form-select w-auto">
-                    <option value="short_term">Last 4 Weeks</option>
-                    <option value="medium_term" selected>Last 6 Months</option>
-                    <option value="long_term">All Time</option>
-                </select>
-            </div>
-            <ul class="nav nav-tabs mb-4" id="statsTabs">
-                <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#topArtistsTab">
-                        <i class="fas fa-users me-2"></i>Top Artists
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#topTracksTab">
-                        <i class="fas fa-music me-2"></i>Top Tracks
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profileTab">
-                        <i class="fas fa-user me-2"></i>Profile
-                    </button>
-                </li>
-            </ul>
+    function getAccessTokenFromUrl() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      return params.get('access_token');
+    }
 
-            <div class="tab-content">
-                <div class="tab-pane fade show active" id="topArtistsTab">
-                    <div id="topArtistsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4"></div>
-                </div>
-                <div class="tab-pane fade" id="topTracksTab">
-                    <div id="topTracksContainer" class="row row-cols-1 row-cols-lg-2 g-4"></div>
-                </div>
-                <div class="tab-pane fade" id="profileTab">
-                    <div class="row">
-                        <div class="col-lg-4 mb-4">
-                            <div class="card h-100 text-center">
-                                <div class="card-body">
-                                    <img id="profileImage" src="" class="img-thumbnail rounded-circle mb-3" width="150">
-                                    <h3 id="profileName"></h3>
-                                    <p class="text-muted" id="profileEmail"></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Account Details</h4>
-                                    <ul class="list-group">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="fas fa-crown me-2"></i>Plan</span>
-                                            <span class="badge bg-success" id="profilePlan"></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="fas fa-users me-2"></i>Followers</span>
-                                            <span id="profileFollowers"></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="fas fa-globe me-2"></i>Country</span>
-                                            <span id="profileCountry"></span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="fas fa-id-card me-2"></i>Account ID</span>
-                                            <span class="text-muted text-truncate" id="profileId"></span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // =============================================
-        // CONFIGURATION - REPLACE THESE WITH YOUR INFO
-        // =============================================
-        const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // Replace with your Spotify app client ID
-        const REDIRECT_URI = 'https://near029.github.io/Shitaktien/bwo.html'; // Replace with your redirect URI (e.g., 'https://yourdomain.com')
-        const SCOPE = 'user-top-read user-read-private user-read-email'; // You can add more scopes if needed
-
-        // =============================================
-        // APPLICATION CODE - NO CHANGES NEEDED BELOW
-        // =============================================
-        // DOM Elements
-        const loginView = document.getElementById('loginView');
-        const statsView = document.getElementById('statsView');
-        const loadingView = document.getElementById('loadingView');
-        const loginBtn = document.getElementById('loginBtn');
-        const mainLoginBtn = document.getElementById('mainLoginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userDropdown = document.getElementById('userDropdown');
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileImage = document.getElementById('profileImage');
-        const profilePlan = document.getElementById('profilePlan');
-        const profileFollowers = document.getElementById('profileFollowers');
-        const profileCountry = document.getElementById('profileCountry');
-        const profileId = document.getElementById('profileId');
-        const topArtistsContainer = document.getElementById('topArtistsContainer');
-        const topTracksContainer = document.getElementById('topTracksContainer');
-        const timeRangeSelect = document.getElementById('timeRangeSelect');
-
-        // Check for access token in URL hash after redirect
-        function checkForAccessToken() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const accessToken = params.get('access_token');
-            const expiresIn = params.get('expires_in');
-            const error = params.get('error');
-
-            if (error) {
-                console.error('Authentication error:', error);
-                return;
-            }
-
-            if (accessToken) {
-                localStorage.setItem('spotify_access_token', accessToken);
-                localStorage.setItem('spotify_token_expiry', Date.now() + (expiresIn * 1000));
-                
-                // Clear the hash from URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                // Immediately load user data and show profile
-                loadUserData();
-            }
-        }
-
-        // Initialize Spotify login
-        function initSpotifyLogin() {
-            const authUrl = new URL('https://accounts.spotify.com/authorize');
-            const params = {
-                client_id: CLIENT_ID,
-                response_type: 'token',
-                redirect_uri: REDIRECT_URI,
-                scope: SCOPE,
-                show_dialog: false
-            };
-
-            Object.keys(params).forEach(key => authUrl.searchParams.append(key, params[key]));
-            window.location.href = authUrl.toString();
-        }
-
-        // Load user data from Spotify API
-        async function loadUserData() {
-            loadingView.style.display = 'block';
-            statsView.style.display = 'none';
-            loginView.style.display = 'none';
-
-            const accessToken = localStorage.getItem('spotify_access_token');
-            if (!accessToken) {
-                handleLogout();
-                return;
-            }
-
-            try {
-                const timeRange = timeRangeSelect.value;
-                const [profile, topArtists, topTracks] = await Promise.all([
-                    fetch('https://api.spotify.com/v1/me', {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    }).then(res => res.json()),
-                    fetch(`https://api.spotify.com/v1/me/top/artists?limit=10&time_range=${timeRange}`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    }).then(res => res.json()),
-                    fetch(`https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=${timeRange}`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    }).then(res => res.json())
-                ]);
-
-                if (profile.error || topArtists.error || topTracks.error) {
-                    throw new Error("Error loading data from Spotify");
-                }
-
-                updateProfileUI(profile);
-                updateTopArtistsUI(topArtists.items || []);
-                updateTopTracksUI(topTracks.items || []);
-
-                loginView.style.display = 'none';
-                statsView.style.display = 'block';
-                loginBtn.style.display = 'none';
-                userDropdown.style.display = 'block';
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert("Error loading your Spotify data. Please try again.");
-                handleLogout();
-            } finally {
-                loadingView.style.display = 'none';
-            }
-        }
-
-        // Update profile UI with user data
-        function updateProfileUI(profile) {
-            userName.textContent = profile.display_name || 'Spotify User';
-            profileName.textContent = profile.display_name || 'Spotify User';
-            profileEmail.textContent = profile.email || 'No email available';
-            profilePlan.textContent = profile.product?.toUpperCase() || 'UNKNOWN';
-            profileFollowers.textContent = profile.followers?.total?.toLocaleString() || '0';
-            profileCountry.textContent = profile.country || 'Unknown';
-            profileId.textContent = profile.id || 'N/A';
-
-            const avatar = profile.images?.[0]?.url || 'https://via.placeholder.com/150';
-            userAvatar.src = avatar;
-            profileImage.src = avatar;
-        }
-
-        // Update top artists UI
-        function updateTopArtistsUI(artists) {
-            if (!artists.length) {
-                topArtistsContainer.innerHTML = '<p class="text-muted">No artist data available.</p>';
-                return;
-            }
-            topArtistsContainer.innerHTML = artists.map((artist, index) => `
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="badge bg-success me-2">${index + 1}</span>
-                                <h5 class="card-title mb-0">${artist.name}</h5>
-                            </div>
-                            <img src="${artist.images[0]?.url || 'https://via.placeholder.com/300'}" 
-                                 class="img-fluid rounded mb-3" 
-                                 alt="${artist.name}"
-                                 onerror="this.src='https://via.placeholder.com/300'">
-                            <p class="card-text">
-                                <small class="text-muted">Popularity: ${artist.popularity}/100</small>
-                            </p>
-                            <p class="card-text">
-                                ${artist.genres.slice(0, 3).map(genre => `<span class="badge bg-secondary me-1">${genre}</span>`).join('')}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update top tracks UI
-        function updateTopTracksUI(tracks) {
-            if (!tracks.length) {
-                topTracksContainer.innerHTML = '<p class="text-muted">No track data available.</p>';
-                return;
-            }
-            topTracksContainer.innerHTML = tracks.map((track, index) => `
-                <div class="col">
-                    <div class="card">
-                        <div class="row g-0">
-                            <div class="col-md-4">
-                                <img src="${track.album.images[0]?.url || 'https://via.placeholder.com/300'}" 
-                                     class="img-fluid rounded-start h-100" 
-                                     alt="${track.name}"
-                                     style="object-fit: cover;"
-                                     onerror="this.src='https://via.placeholder.com/300'">
-                            </div>
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="badge bg-success me-2">${index + 1}</span>
-                                        <h5 class="card-title mb-0">${track.name}</h5>
-                                    </div>
-                                    <p class="card-text text-muted">
-                                        ${track.artists.map(artist => artist.name).join(', ')}
-                                    </p>
-                                    <p class="card-text">
-                                        <small class="text-muted">Album: ${track.album.name}</small>
-                                    </p>
-                                    ${track.preview_url ? `
-                                        <audio controls class="w-100 mt-2">
-                                            <source src="${track.preview_url}" type="audio/mpeg">
-                                        </audio>
-                                    ` : `
-                                        <p class="text-muted mt-2"><small>No preview available</small></p>
-                                    `}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Handle logout
-        function handleLogout() {
-            localStorage.removeItem('spotify_access_token');
-            localStorage.removeItem('spotify_token_expiry');
-            loginView.style.display = 'block';
-            statsView.style.display = 'none';
-            userDropdown.style.display = 'none';
-            loginBtn.style.display = 'block';
-        }
-
-        // Check login status on page load
-        function checkLoginStatus() {
-            const accessToken = localStorage.getItem('spotify_access_token');
-            const tokenExpiry = localStorage.getItem('spotify_token_expiry');
-
-            if (accessToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
-                // User is logged in
-                loginView.style.display = 'none';
-                statsView.style.display = 'block';
-                loginBtn.style.display = 'none';
-                userDropdown.style.display = 'block';
-            } else if (accessToken) {
-                // Token expired
-                handleLogout();
-            }
-        }
-
-        // Event Listeners
-        loginBtn.addEventListener('click', initSpotifyLogin);
-        mainLoginBtn.addEventListener('click', initSpotifyLogin);
-        logoutBtn.addEventListener('click', handleLogout);
-        timeRangeSelect.addEventListener('change', loadUserData);
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            checkForAccessToken();
-            checkLoginStatus();
-            
-            // If we have a token but not yet loaded data, load it
-            if (localStorage.getItem('spotify_access_token') && statsView.style.display === 'none') {
-                loadUserData();
-            }
+    async function fetchPlaylists(token) {
+      try {
+        const res = await fetch('https://api.spotify.com/v1/me/playlists', {
+          headers: { Authorization: 'Bearer ' + token }
         });
-    </script>
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        // Optional: save JSON file locally
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "spotify_playlists.json";
+        a.click();
+      } catch (err) {
+        document.getElementById('output').textContent = 'Error fetching playlists: ' + err;
+      }
+    }
+
+    window.addEventListener('load', () => {
+      const token = getAccessTokenFromUrl();
+      if (token) {
+        history.replaceState({}, document.title, window.location.pathname); // clean URL
+        fetchPlaylists(token);
+      }
+    });
+  </script>
 </body>
 </html>
