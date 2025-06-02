@@ -1,27 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Spotify Playlist Fetcher</title>
+  <title>Spotify Login</title>
 </head>
 <body>
-  <button id="loginBtn">Login with Spotify</button>
 
-  <script>
-    const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // Replace with your Spotify App Client ID
-    const REDIRECT_URI = 'https://near029.github.io/Shitaktien/bwo.html';
-    const SCOPE = 'playlist-read-private playlist-read-collaborative';
+  <button onclick="loginWithSpotify()">Login with Spotify</button>
 
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const authUrl = new URL('https://accounts.spotify.com/authorize');
-      authUrl.searchParams.set('client_id', CLIENT_ID);
-      authUrl.searchParams.set('response_type', 'token');
-      authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
-      authUrl.searchParams.set('scope', SCOPE);
-      authUrl.searchParams.set('show_dialog', 'true');
-      window.location.href = authUrl.toString();
-    });
-  </script>
+  <script src="a.js"></script>
 </body>
 </html>
