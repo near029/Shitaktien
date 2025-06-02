@@ -433,56 +433,7 @@ function getAxisColor() {
       genreChart.update();
     });
 
-async function fetchAllPlaylists(token) {
-      let playlists = [];
-      let url = 'https://api.spotify.com/v1/me/playlists?limit=50';
 
-      while (url) {
-        const res = await fetch(url, {
-          headers: { Authorization: 'Bearer ' + token }
-        });
-        const data = await res.json();
-        if (data.items) {
-          playlists.push(...data.items);
-          url = data.next;
-        } else {
-          throw new Error('Failed to load playlists');
-        }
-      }
-
-      return playlists.map(p => ({
-        name: p.name,
-        owner: p.owner.display_name || p.owner.id
-      }));
-    }
-
-    function saveJSON(data, filename) {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    (async () => {
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      const token = params.get('access_token');
-      if (!token) {
-        document.body.innerHTML = '<p>Access token missing. Please go back and try again.</p>';
-        return;
-      }
-
-      try {
-        const playlists = await fetchAllPlaylists(token);
-        saveJSON(playlists, 'playlists.json');
-        document.body.innerHTML = '<p>Download started: playlists.json</p>';
-      } catch (err) {
-        console.error(err);
-        document.body.innerHTML = '<p>Failed to fetch playlists.</p>';
-      }
-    })();
 
 
   </script>
