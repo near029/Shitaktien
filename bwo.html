@@ -28,8 +28,6 @@
       border-radius: 1rem;
       transition: transform 0.3s ease;
     }
-
-    /* 🎯 HIER: Textfarbe in Card-Elementen */
     .card p,
     .card li {
       color: var(--spotify-green);
@@ -73,6 +71,19 @@
 </head>
 <body>
   <div class="container fade-in">
+        <div class="d-flex justify-content-start mb-4">
+      <div class="dropdown">
+        <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Auswahl
+        </button>
+        <ul class="dropdown-menu bg-dark border-0">
+          <li><a class="dropdown-item text-success" href="#">🎵 Lieblingskünstler</a></li>
+          <li><a class="dropdown-item text-success" href="#">📈 Genre-Trends</a></li>
+          <li><a class="dropdown-item text-success" href="#">⏱ Hörgewohnheiten</a></li>
+          <li><a class="dropdown-item text-success" href="#">📂 Datenexport</a></li>
+        </ul>
+      </div>
+    </div>
     <a href="index.html" class="btn btn-outline-light btn-back"><i class="bi bi-arrow-left"></i> Zurück zur Startseite</a>
     <h1 class="mb-4"><i class="bi bi-graph-up-arrow icon"></i>Erweiterte Spotify Auswertung</h1>
 
