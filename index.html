@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Spotify Stats</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -67,6 +69,9 @@
         audio::-webkit-media-controls-panel {
             background-color: var(--spotify-gray);
         }
+        #loadingView {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -93,6 +98,15 @@
     </nav>
 
     <div class="container my-5">
+        <!-- Loading View -->
+        <div id="loadingView" class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading your Spotify data...</p>
+        </div>
+
+        <!-- Login View -->
         <div id="loginView" class="text-center py-5">
             <h1 class="display-4 mb-4">Your Spotify Listening Statistics</h1>
             <p class="lead mb-5">Discover your top artists, tracks, and more</p>
@@ -101,6 +115,7 @@
             </button>
         </div>
 
+        <!-- Stats View -->
         <div id="statsView" style="display:none;">
             <div class="d-flex justify-content-end mb-3">
                 <select id="timeRangeSelect" class="form-select w-auto">
@@ -176,14 +191,23 @@
         </div>
     </div>
 
+    <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f';
-        const REDIRECT_URI = 'https://near029.github.io/Shitaktien/bwo.html';
-        const SCOPE = 'user-top-read user-read-private user-read-email';
+        // =============================================
+        // CONFIGURATION - REPLACE THESE WITH YOUR INFO
+        // =============================================
+        const CLIENT_ID = 'YOUR_SPOTIFY_CLIENT_ID'; // Replace with your Spotify app client ID
+        const REDIRECT_URI = 'YOUR_REDIRECT_URI'; // Replace with your redirect URI (e.g., 'https://yourdomain.com')
+        const SCOPE = 'user-top-read user-read-private user-read-email'; // You can add more scopes if needed
 
+        // =============================================
+        // APPLICATION CODE - NO CHANGES NEEDED BELOW
+        // =============================================
+        // DOM Elements
         const loginView = document.getElementById('loginView');
         const statsView = document.getElementById('statsView');
+        const loadingView = document.getElementById('loadingView');
         const loginBtn = document.getElementById('loginBtn');
         const mainLoginBtn = document.getElementById('mainLoginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
@@ -201,20 +225,32 @@
         const topTracksContainer = document.getElementById('topTracksContainer');
         const timeRangeSelect = document.getElementById('timeRangeSelect');
 
+        // Check for access token in URL hash after redirect
         function checkForAccessToken() {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
             const accessToken = params.get('access_token');
             const expiresIn = params.get('expires_in');
+            const error = params.get('error');
+
+            if (error) {
+                console.error('Authentication error:', error);
+                return;
+            }
 
             if (accessToken) {
                 localStorage.setItem('spotify_access_token', accessToken);
                 localStorage.setItem('spotify_token_expiry', Date.now() + (expiresIn * 1000));
+                
+                // Clear the hash from URL
                 window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Immediately load user data and show profile
                 loadUserData();
             }
         }
 
+        // Initialize Spotify login
         function initSpotifyLogin() {
             const authUrl = new URL('https://accounts.spotify.com/authorize');
             const params = {
@@ -222,16 +258,24 @@
                 response_type: 'token',
                 redirect_uri: REDIRECT_URI,
                 scope: SCOPE,
-                show_dialog: true
+                show_dialog: false
             };
 
             Object.keys(params).forEach(key => authUrl.searchParams.append(key, params[key]));
             window.location.href = authUrl.toString();
         }
 
+        // Load user data from Spotify API
         async function loadUserData() {
+            loadingView.style.display = 'block';
+            statsView.style.display = 'none';
+            loginView.style.display = 'none';
+
             const accessToken = localStorage.getItem('spotify_access_token');
-            if (!accessToken) return;
+            if (!accessToken) {
+                handleLogout();
+                return;
+            }
 
             try {
                 const timeRange = timeRangeSelect.value;
@@ -247,7 +291,9 @@
                     }).then(res => res.json())
                 ]);
 
-                if (profile.error || topArtists.error || topTracks.error) throw new Error("Fehler beim Laden der Daten.");
+                if (profile.error || topArtists.error || topTracks.error) {
+                    throw new Error("Error loading data from Spotify");
+                }
 
                 updateProfileUI(profile);
                 updateTopArtistsUI(topArtists.items || []);
@@ -259,12 +305,15 @@
                 userDropdown.style.display = 'block';
 
             } catch (error) {
-                alert("Fehler beim Laden deiner Spotify-Daten. Bitte versuche es erneut.");
-                console.error('Fehler:', error);
+                console.error('Error:', error);
+                alert("Error loading your Spotify data. Please try again.");
                 handleLogout();
+            } finally {
+                loadingView.style.display = 'none';
             }
         }
 
+        // Update profile UI with user data
         function updateProfileUI(profile) {
             userName.textContent = profile.display_name || 'Spotify User';
             profileName.textContent = profile.display_name || 'Spotify User';
@@ -279,9 +328,10 @@
             profileImage.src = avatar;
         }
 
+        // Update top artists UI
         function updateTopArtistsUI(artists) {
             if (!artists.length) {
-                topArtistsContainer.innerHTML = '<p class="text-muted">Keine Daten vorhanden.</p>';
+                topArtistsContainer.innerHTML = '<p class="text-muted">No artist data available.</p>';
                 return;
             }
             topArtistsContainer.innerHTML = artists.map((artist, index) => `
@@ -308,9 +358,10 @@
             `).join('');
         }
 
+        // Update top tracks UI
         function updateTopTracksUI(tracks) {
             if (!tracks.length) {
-                topTracksContainer.innerHTML = '<p class="text-muted">Keine Daten vorhanden.</p>';
+                topTracksContainer.innerHTML = '<p class="text-muted">No track data available.</p>';
                 return;
             }
             topTracksContainer.innerHTML = tracks.map((track, index) => `
@@ -351,6 +402,7 @@
             `).join('');
         }
 
+        // Handle logout
         function handleLogout() {
             localStorage.removeItem('spotify_access_token');
             localStorage.removeItem('spotify_token_expiry');
@@ -360,25 +412,38 @@
             loginBtn.style.display = 'block';
         }
 
+        // Check login status on page load
         function checkLoginStatus() {
             const accessToken = localStorage.getItem('spotify_access_token');
             const tokenExpiry = localStorage.getItem('spotify_token_expiry');
 
             if (accessToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
-                loadUserData();
+                // User is logged in
+                loginView.style.display = 'none';
+                statsView.style.display = 'block';
+                loginBtn.style.display = 'none';
+                userDropdown.style.display = 'block';
             } else if (accessToken) {
+                // Token expired
                 handleLogout();
             }
         }
 
+        // Event Listeners
         loginBtn.addEventListener('click', initSpotifyLogin);
         mainLoginBtn.addEventListener('click', initSpotifyLogin);
         logoutBtn.addEventListener('click', handleLogout);
         timeRangeSelect.addEventListener('change', loadUserData);
 
+        // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
             checkForAccessToken();
             checkLoginStatus();
+            
+            // If we have a token but not yet loaded data, load it
+            if (localStorage.getItem('spotify_access_token') && statsView.style.display === 'none') {
+                loadUserData();
+            }
         });
     </script>
 </body>
