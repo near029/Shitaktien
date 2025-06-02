@@ -4,199 +4,128 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meine Spotify Auswertung</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.bundle.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
     :root {
       --spotify-green: #1DB954;
-      --spotify-light: #1ed760;
-      --dark-bg: #121212;
-      --dark-card: #181818;
-      --light-bg: #f9f9f9;
-      --light-card: #fff;
-      --light-text: #333;
     }
-
     body {
-      background-color: var(--dark-bg);
+      background-color: #121212;
       color: var(--spotify-green);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 2rem;
-      transition: background-color 0.3s, color 0.3s;
     }
-
     h1, h2, h3 {
       color: var(--spotify-green);
     }
-
     .card {
-      background-color: var(--dark-card);
+      background-color: #181818;
       border: none;
       border-radius: 1rem;
-      transition: transform 0.3s ease, background-color 0.3s;
+      transition: transform 0.3s ease;
     }
-
-    .card p,
-    .card li {
+    .card p, .card li {
       color: var(--spotify-green);
     }
-
     .card:hover {
       transform: scale(1.02);
     }
-
     a.btn-back {
       margin-bottom: 2rem;
     }
-
     .fade-in {
       animation: fadeIn 1s ease-in;
     }
-
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     ul li::before {
       content: "🎧 ";
     }
-
     .icon {
       font-size: 1.5rem;
       color: var(--spotify-green);
       margin-right: 0.5rem;
     }
-
     a {
       color: var(--spotify-green);
-      transition: color 0.3s;
     }
-
     a:hover {
-      color: var(--spotify-light);
+      color: #1ed760;
     }
-
-    /* Dark/Light Mode Toggle Button */
-    #darkModeToggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      background-color: var(--spotify-green);
+    /* Dropdown Checkbox Style */
+    .dropdown-menu {
+      background-color: #181818;
       border: none;
-      color: black;
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
+      padding: 1rem 1.5rem;
+      min-width: 220px;
+    }
+    .dropdown-item {
       cursor: pointer;
-      font-weight: bold;
-      z-index: 1050;
-      transition: background-color 0.3s;
     }
-
-    #darkModeToggle:hover {
-      background-color: var(--spotify-light);
-    }
-
-    /* Light mode overrides */
-    body.light-mode {
-      background-color: var(--light-bg);
-      color: var(--light-text);
-    }
-
-    body.light-mode h1,
-    body.light-mode h2,
-    body.light-mode h3 {
-      color: var(--spotify-green);
-    }
-
-    body.light-mode .card {
-      background-color: var(--light-card);
-    }
-
-    body.light-mode .card p,
-    body.light-mode .card li {
-      color: var(--spotify-green);
-    }
-
-    body.light-mode a {
-      color: var(--spotify-green);
-    }
-
-    body.light-mode a:hover {
-      color: var(--spotify-light);
-    }
-
-    /* Responsive tweaks if needed */
-    @media (max-width: 575px) {
-      body {
-        padding: 1rem;
-      }
+    .form-check-input {
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle -->
-  <button id="darkModeToggle" aria-label="Toggle Dark Mode">🌞</button>
-
   <div class="container fade-in">
-    <!-- Dropdown Auswahl -->
-    <div class="d-flex justify-content-start mb-4 flex-wrap gap-2">
+    <!-- Obere Auswahl Dropdown -->
+    <div class="d-flex justify-content-start mb-4 gap-3 flex-wrap">
       <div class="dropdown">
-        <button
-          class="btn btn-success dropdown-toggle"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
+        <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           Auswahl
         </button>
-        <ul class="dropdown-menu bg-dark border-0">
-          <li1><a class="dropdown-item text-success" href="#">🎵 Lieblingskünstler</a></li>
-          <li1><a class="dropdown-item text-success" href="#">📈 Genre-Trends</a></li>
-          <li1><a class="dropdown-item text-success" href="#">⏱ Hörgewohnheiten</a></li>
-          <li1><a class="dropdown-item text-success" href="#">📂 Datenexport</a></li>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item text-success" href="#">🎵 Lieblingskünstler</a></li>
+          <li><a class="dropdown-item text-success" href="#">📈 Genre-Trends</a></li>
+          <li><a class="dropdown-item text-success" href="#">⏱ Hörgewohnheiten</a></li>
+          <li><a class="dropdown-item text-success" href="#">📂 Datenexport</a></li>
         </ul>
       </div>
 
-      <!-- Genre Filter -->
-      <select class="form-select w-auto" id="genreFilter" aria-label="Genre Filter">
-        <option value="all" selected>Alle Genres</option>
-        <option value="pop">Pop</option>
-        <option value="rock">Rock</option>
-        <option value="hiphop">Hip-Hop</option>
-        <option value="electronic">Electronic</option>
-        <option value="classical">Klassik</option>
-      </select>
+      <!-- Genre Multiselect Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Genres auswählen
+        </button>
+        <ul class="dropdown-menu">
+          <li class="form-check">
+            <input class="form-check-input" type="checkbox" value="pop" id="genrePop" checked />
+            <label class="form-check-label text-success" for="genrePop">Pop</label>
+          </li>
+          <li class="form-check">
+            <input class="form-check-input" type="checkbox" value="rock" id="genreRock" checked />
+            <label class="form-check-label text-success" for="genreRock">Rock</label>
+          </li>
+          <li class="form-check">
+            <input class="form-check-input" type="checkbox" value="hiphop" id="genreHiphop" checked />
+            <label class="form-check-label text-success" for="genreHiphop">Hip-Hop</label>
+          </li>
+          <li class="form-check">
+            <input class="form-check-input" type="checkbox" value="electronic" id="genreElectronic" checked />
+            <label class="form-check-label text-success" for="genreElectronic">Electronic</label>
+          </li>
+          <li class="form-check">
+            <input class="form-check-input" type="checkbox" value="classical" id="genreClassical" checked />
+            <label class="form-check-label text-success" for="genreClassical">Klassik</label>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <a href="index.html" class="btn btn-outline-light btn-back">
-      <i class="bi bi-arrow-left"></i> Zurück zur Startseite
-    </a>
+    <a href="index.html" class="btn btn-outline-light btn-back"><i class="bi bi-arrow-left"></i> Zurück zur Startseite</a>
 
-    <h1 class="mb-4">
-      <i class="bi bi-graph-up-arrow icon"></i>Erweiterte Spotify Auswertung
-    </h1>
+    <h1 class="mb-4"><i class="bi bi-graph-up-arrow icon"></i>Erweiterte Spotify Auswertung</h1>
 
     <div class="row g-4">
       <div class="col-md-6">
         <div class="card p-4">
           <h2 class="mb-3"><i class="bi bi-hourglass-split icon"></i>Analyse kommt bald...</h2>
-          <p>
-            Hier kannst du später detaillierte Informationen zu deinem Musikgeschmack,
-            deinen Hörzeiten, Genres, Lieblingskünstlern, Track-Verlauf und vielem mehr sehen.
-          </p>
+          <p>Hier kannst du später detaillierte Informationen zu deinem Musikgeschmack, deinen Hörzeiten, Genres, Lieblingskünstlern, Track-Verlauf und vielem mehr sehen.</p>
           <p><em>Diese Seite ist aktuell in Vorbereitung.</em></p>
         </div>
       </div>
@@ -209,117 +138,116 @@
             <li>Verlauf deiner Lieblingskünstler im Jahr</li>
             <li>Top-Songs nach Stimmung oder Geschwindigkeit</li>
             <li>Playlist-Vorschläge basierend auf deinen Daten</li>
+            <li>Export-Funktion als PDF oder Bild</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- Chart Bereich -->
-    <div class="row mt-5">
-      <div class="col-12 col-md-8 offset-md-2">
-        <div class="card p-4">
-          <h3 class="mb-4"><i class="bi bi-bar-chart icon"></i>Häufig gehörte Genres</h3>
-          <canvas id="genreChart" aria-label="Chart über häufig gehörte Genres" role="img"></canvas>
-        </div>
-      </div>
+    <div class="card p-4 mt-4">
+      <h2><i class="bi bi-bar-chart icon"></i>Genre-Verteilung</h2>
+      <canvas id="genreChart" height="300"></canvas>
     </div>
   </div>
 
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // Dark Mode Toggle
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const body = document.body;
-
-    // Prüfen ob Dark Mode gespeichert ist (localStorage)
-    if (localStorage.getItem('darkMode') === 'off') {
-      body.classList.add('light-mode');
-      darkModeToggle.textContent = '🌙';
-    }
-
-    darkModeToggle.addEventListener('click', () => {
-      if (body.classList.contains('light-mode')) {
-        body.classList.remove('light-mode');
-        localStorage.setItem('darkMode', 'on');
-        darkModeToggle.textContent = '🌞';
-      } else {
-        body.classList.add('light-mode');
-        localStorage.setItem('darkMode', 'off');
-        darkModeToggle.textContent = '🌙';
-      }
-    });
-
-    // Beispiel-Daten für Chart.js
+    // Beispiel-Daten je Genre (Labels und Counts)
     const genresData = {
-      all: {
-        labels: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Klassik'],
-        counts: [40, 25, 15, 10, 10],
-      },
       pop: {
-        labels: ['Pop 1', 'Pop 2', 'Pop 3'],
-        counts: [15, 10, 15],
+        labels: ['Song A', 'Song B', 'Song C'],
+        counts: [12, 19, 3]
       },
       rock: {
-        labels: ['Rock 1', 'Rock 2'],
-        counts: [10, 15],
+        labels: ['Rock Song 1', 'Rock Song 2'],
+        counts: [7, 14]
       },
       hiphop: {
-        labels: ['Hip-Hop 1', 'Hip-Hop 2', 'Hip-Hop 3'],
-        counts: [5, 7, 3],
+        labels: ['Hip-Hop 1', 'Hip-Hop 2', 'Hip-Hop 3', 'Hip-Hop 4'],
+        counts: [10, 8, 15, 6]
       },
       electronic: {
         labels: ['Electronic 1', 'Electronic 2'],
-        counts: [6, 4],
+        counts: [5, 11]
       },
       classical: {
-        labels: ['Klassik 1', 'Klassik 2', 'Klassik 3'],
-        counts: [3, 4, 3],
-      },
+        labels: ['Classical 1'],
+        counts: [9]
+      }
     };
 
-    const ctx = document.getElementById('genreChart').getContext('2d');
+    // Hilfsfunktion: Kombiniere Labels und Werte (ohne Duplikate bei Labels)
+    function combineGenres(selectedGenres) {
+      const combined = { labels: [], counts: [] };
+      const labelMap = new Map();
 
+      selectedGenres.forEach(genre => {
+        const data = genresData[genre];
+        if (!data) return;
+        data.labels.forEach((label, idx) => {
+          if (!labelMap.has(label)) {
+            labelMap.set(label, data.counts[idx]);
+          } else {
+            labelMap.set(label, labelMap.get(label) + data.counts[idx]);
+          }
+        });
+      });
+
+      labelMap.forEach((count, label) => {
+        combined.labels.push(label);
+        combined.counts.push(count);
+      });
+
+      return combined;
+    }
+
+    // Chart Setup
+    const ctx = document.getElementById('genreChart').getContext('2d');
     let genreChart = new Chart(ctx, {
-      type: 'doughnut',
+      type: 'bar',
       data: {
-        labels: genresData.all.labels,
-        datasets: [
-          {
-            label: 'Anzahl der Songs',
-            data: genresData.all.counts,
-            backgroundColor: [
-              '#1DB954',
-              '#17a2b8',
-              '#ffc107',
-              '#6f42c1',
-              '#fd7e14',
-            ],
-            borderWidth: 1,
-          },
-        ],
+        labels: genresData.pop.labels,
+        datasets: [{
+          label: 'Anzahl Plays',
+          data: genresData.pop.counts,
+          backgroundColor: 'var(--spotify-green)'
+        }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--spotify-green)' } },
+        scales: {
+          y: { beginAtZero: true }
         },
-      },
+        plugins: {
+          legend: { labels: { color: 'var(--spotify-green)' } }
+        }
+      }
     });
 
-    // Genre Filter Logik
-    const genreFilter = document.getElementById('genreFilter');
+    // Checkbox-Eventlistener für Multiselect Genres
+    const checkboxes = document.querySelectorAll('.dropdown-menu input[type=checkbox]');
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const selectedGenres = Array.from(checkboxes)
+          .filter(chk => chk.checked)
+          .map(chk => chk.value);
 
-    genreFilter.addEventListener('change', () => {
-      const selected = genreFilter.value;
+        if (selectedGenres.length === 0) {
+          // Nichts ausgewählt => Chart leeren
+          genreChart.data.labels = [];
+          genreChart.data.datasets[0].data = [];
+          genreChart.update();
+          return;
+        }
 
-      const data = genresData[selected] || genresData.all;
-
-      genreChart.data.labels = data.labels;
-      genreChart.data.datasets[0].data = data.counts;
-      genreChart.update();
+        const combined = combineGenres(selectedGenres);
+        genreChart.data.labels = combined.labels;
+        genreChart.data.datasets[0].data = combined.counts;
+        genreChart.update();
+      });
     });
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
