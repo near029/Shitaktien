@@ -444,3 +444,13 @@ function getAxisColor() {
   <script src="a.js"></script>
 </body>
 </html>
+<script type="module">
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  
+  if (code) {
+    // Exchange the code for a token (use your existing logic)
+    const accessToken = await getAccessToken("YOUR_CLIENT_ID", code);
+    // Fetch profile or redirect to another page
+  }
+</script>
