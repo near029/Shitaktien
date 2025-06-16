@@ -42,18 +42,7 @@ export async function getAccessToken(clientId, code) {
         console.error("Error getting access token:", error);
         throw error;
     }
-// In getAccessToken():
-const response = await fetch("https://accounts.spotify.com/api/token", {
-  // ...
-});
-console.log("Token response:", await response.clone().json()); // Clone to avoid consuming stream
-return access_token;
 
-// In fetchProfile():
-const profile = await fetch("https://api.spotify.com/v1/me", {
-  headers: { Authorization: `Bearer ${token}` }
-});
-console.log("Profile data:", await profile.clone().json());
 
 }
 
