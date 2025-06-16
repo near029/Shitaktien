@@ -14,7 +14,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
   <style>
-    /* Dein CSS bleibt unverändert, nur aus Platzgründen hier gekürzt */
     :root {
       --spotify-green: #1DB954;
       --spotify-light: #1ed760;
@@ -34,7 +33,143 @@
       display: flex;
       min-height: 100vh;
     }
-    /* ...restliches CSS unverändert... */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: var(--dark-card);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.7);
+      z-index: 1100;
+    }
+    .sidebar h2 {
+      color: var(--spotify-green);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      user-select: none;
+    }
+    .sidebar a,
+    .sidebar button,
+    .sidebar select {
+      color: var(--spotify-green);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: left;
+      width: 100%;
+      padding: 0.5rem 0;
+      border-radius: 0.3rem;
+      transition: background-color 0.2s;
+    }
+    .sidebar a:hover,
+    .sidebar button:hover,
+    .sidebar select:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+      text-decoration: none;
+    }
+    .sidebar select {
+      color: var(--spotify-green);
+      background-color: transparent;
+      border: 1px solid var(--spotify-green);
+      padding: 0.4rem;
+      border-radius: 0.3rem;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      flex: 1;
+    }
+    h1, h2, h3 {
+      color: var(--spotify-green);
+    }
+    .card {
+      background-color: var(--dark-card);
+      border: none;
+      border-radius: 1rem;
+      transition: transform 0.3s ease, background-color 0.3s;
+    }
+    .card p, .card li {
+      color: var(--spotify-green);
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    a.btn-back {
+      margin-bottom: 2rem;
+      color: var(--spotify-green);
+      border-color: var(--spotify-green);
+    }
+    a.btn-back:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+      text-decoration: none;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    ul li::before { content: "🎧 "; }
+    .icon {
+      font-size: 1.5rem;
+      color: var(--spotify-green);
+      margin-right: 0.5rem;
+    }
+    a {
+      color: var(--spotify-green);
+      transition: color 0.3s;
+    }
+    a:hover { color: var(--spotify-light);}
+    #darkModeToggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: var(--spotify-green);
+      border: none;
+      color: black;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 1150;
+      transition: background-color 0.3s;
+    }
+    #darkModeToggle:hover { background-color: var(--spotify-light);}
+    body.light-mode {
+      background-color: var(--light-bg);
+      color: var(--light-text);
+    }
+    body.light-mode h1, body.light-mode h2, body.light-mode h3 {
+      color: var(--spotify-green);
+    }
+    body.light-mode .card {
+      background-color: var(--light-card);
+      border: 2px solid #556B2F;
+    }
+    body.light-mode .card p, body.light-mode .card li {
+      color: var(--spotify-green);
+    }
+    body.light-mode a { color: var(--spotify-green);}
+    body.light-mode a:hover { color: var(--spotify-light);}
+    @media (max-width: 768px) {
+      .sidebar { position: relative; width: 100%; height: auto; box-shadow: none; padding: 1rem 1rem 1rem 1rem; flex-direction: row; gap: 1rem; overflow-x: auto;}
+      .sidebar h2 { display: none;}
+      .sidebar a, .sidebar button, .sidebar select { flex: 1 0 auto; text-align: center; padding: 0.5rem;}
+      .main-content { margin-left: 0; padding: 1rem;}
+    }
   </style>
 </head>
 <body>
@@ -66,8 +201,29 @@
       <i class="bi bi-graph-up-arrow icon"></i>Erweiterte Spotify Auswertung
     </h1>
     <div id="playlist-container">Loading playlists...</div>
-    <!-- ... weitere Inhalte ... -->
-
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h2 class="mb-3"><i class="bi bi-hourglass-split icon"></i>Analyse kommt bald...</h2>
+          <p>
+            Hier kannst du später detaillierte Informationen zu deinem Musikgeschmack,
+            deinen Hörzeiten, Genres, Lieblingskünstlern, Track-Verlauf und vielem mehr sehen.
+          </p>
+          <p><em>Diese Seite ist aktuell in Vorbereitung.</em></p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h3><i class="bi bi-lightbulb icon"></i>Ideen für Inhalte:</h3>
+          <ul>
+            <li>Diagramme über häufig gehörte Genres</li>
+            <li>Verlauf deiner Lieblingskünstler im Jahr</li>
+            <li>Top-Songs nach Stimmung oder Geschwindigkeit</li>
+            <li>Playlist-Vorschläge basierend auf deinen Daten</li>
+          </ul>
+        </div>
+      </div>
+    </div>
     <!-- Chart Bereich -->
     <div class="row mt-5">
       <div class="col-12 col-md-8 offset-md-2">
@@ -82,14 +238,18 @@
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Main Script für Chart und DarkMode -->
   <script type="module">
-    // --- Dark Mode ---
+    // Dark Mode Toggle
     const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
+
+    // Prüfen ob Dark Mode gespeichert ist (localStorage)
     if (localStorage.getItem('darkMode') === 'off') {
       body.classList.add('light-mode');
       darkModeToggle.textContent = '🌙';
     }
+
     darkModeToggle.addEventListener('click', () => {
       if (body.classList.contains('light-mode')) {
         body.classList.remove('light-mode');
@@ -102,7 +262,7 @@
       }
     });
 
-    // --- Chart.js Setup ---
+    // Beispiel-Daten für Chart.js
     const genresData = {
       all:   { labels: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Klassik'], counts: [40, 25, 15, 10, 10] },
       pop:   { labels: ['Pop 1', 'Pop 2', 'Pop 3'], counts: [15, 10, 15] },
@@ -112,6 +272,7 @@
       classical: { labels: ['Klassik 1', 'Klassik 2'], counts: [6, 4] },
     };
 
+    // Chart initialisieren mit DataLabels und spotify-grün für alle Zahlen!
     const ctx = document.getElementById('genreChart').getContext('2d');
     let genreChart = new Chart(ctx, {
       type: 'bar',
@@ -133,7 +294,7 @@
           y: {
             beginAtZero: true,
             ticks: {
-              color: '#1DB954',
+              color: '#1DB954', // Spotify-Grün für Y-Achsen-Zahlen
               stepSize: 5,
             },
             grid: {
@@ -142,7 +303,7 @@
           },
           x: {
             ticks: {
-              color: '#1DB954',
+              color: '#1DB954', // Spotify-Grün für X-Achsen-Zahlen
             },
             grid: {
               color: 'transparent',
@@ -151,150 +312,37 @@
         },
         plugins: {
           datalabels: {
-            color: '#1DB954',
+            color: '#1DB954',       // Spotify-Grün für Zahlen auf den Balken
             font: { weight: 'bold', size: 14 }
           },
           legend: {
             labels: {
-              color: '#1DB954',
+              color: '#1DB954',     // Spotify-Grün für Legende
               font: { size: 14 },
             },
           },
           tooltip: {
             backgroundColor: '#222',
-            titleColor: '#1DB954',
-            bodyColor: '#1DB954',
+            titleColor: '#1DB954',  // Spotify-Grün im Tooltip
+            bodyColor: '#1DB954',   // Spotify-Grün im Tooltip
           },
         },
       },
-      plugins: [ChartDataLabels],
+      plugins: [ChartDataLabels], // DataLabels-Plugin aktivieren!
     });
 
-    document.getElementById('genreFilter').addEventListener('change', (e) => {
-      const selected = e.target.value;
+    // Genre Filter Listener
+    const genreFilter = document.getElementById('genreFilter');
+    genreFilter.addEventListener('change', () => {
+      const selected = genreFilter.value;
       const data = genresData[selected] || genresData.all;
       genreChart.data.labels = data.labels;
       genreChart.data.datasets[0].data = data.counts;
       genreChart.update();
     });
-
-    // --- PKCE Helper Functions ---
-    // URL-sichere Base64 (RFC 4648 §5)
-    function base64UrlEncode(buffer) {
-      return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    }
-
-    function generateCodeVerifier(length = 128) {
-      const array = new Uint8Array(length);
-      crypto.getRandomValues(array);
-      // nur sichere Base64 URL
-      return base64UrlEncode(array);
-    }
-
-    async function generateCodeChallenge(verifier) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(verifier);
-      const digest = await crypto.subtle.digest('SHA-256', data);
-      return base64UrlEncode(digest);
-    }
-
-    // --- OAuth2 PKCE Flow ---
-    async function redirectToAuthCodeFlow(clientId) {
-      const verifier = generateCodeVerifier();
-      const challenge = await generateCodeChallenge(verifier);
-      localStorage.setItem('pkce_verifier', verifier);
-
-      const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: clientId,
-        redirect_uri: window.location.origin + window.location.pathname,
-        scope: 'user-top-read user-read-private',
-        code_challenge_method: 'S256',
-        code_challenge: challenge,
-      });
-
-      window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    }
-
-    async function getAccessToken(clientId, code) {
-      const verifier = localStorage.getItem('pkce_verifier');
-      const params = new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: window.location.origin + window.location.pathname,
-        client_id: clientId,
-        code_verifier: verifier,
-      });
-
-      // Achtung: Spotify blockiert CORS auf diesen Endpunkt,
-      // daher nur mit Backend-Proxy oder serverseitig nutzbar!
-      try {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString(),
-        });
-
-        if (!response.ok) throw new Error('Token konnte nicht geholt werden');
-
-        const data = await response.json();
-        return data.access_token;
-      } catch (e) {
-        console.error(e);
-        alert('Fehler beim Abrufen des Tokens. Benutze einen Server-Proxy!');
-      }
-    }
-
-    // --- Hauptlogik ---
-    async function main() {
-      const clientId = '5db2bd0986654ef98bff31892d4f818f';
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-
-      let accessToken;
-
-      if (!code) {
-        // Kein Code: Weiterleiten zu Spotify Auth
-        redirectToAuthCodeFlow(clientId);
-      } else {
-        // Code vorhanden: Access Token holen
-        accessToken = await getAccessToken(clientId, code);
-        if (!accessToken) return;
-        localStorage.setItem('spotify_access_token', accessToken);
-        // URL bereinigen
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-
-      if (!accessToken) {
-        accessToken = localStorage.getItem('spotify_access_token');
-      }
-
-      if (!accessToken) {
-        // Token fehlt: neu starten
-        redirectToAuthCodeFlow(clientId);
-        return;
-      }
-
-      // Beispiel: Nutzerprofil abrufen
-      const userProfile = await fetch('https://api.spotify.com/v1/me', {
-        headers: { Authorization: 'Bearer ' + accessToken },
-      }).then(r => r.json());
-
-      document.getElementById('playlist-container').innerText =
-        `Hallo ${userProfile.display_name}! Hier kannst du deine Spotify-Daten sehen.`;
-
-      // Weitere Daten laden, Charts füllen usw...
-    }
-
-    main();
   </script>
-</body>
-</html>
-
-})();
-
-  </script>
+  <script src="a.js"></script>
+  <script type="module" src="authCodeWithPkce.js"></script>
 </body>
 </html>
         }
