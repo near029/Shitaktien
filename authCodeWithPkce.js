@@ -5,14 +5,14 @@ export async function redirectToAuthCodeFlow(clientId) {
     localStorage.setItem("verifier", verifier);
 
     const params = new URLSearchParams();
-    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Fixed parameter name
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Korrigierter Parametername
     params.append("response_type", "code");
     params.append("redirect_uri", window.location.origin + window.location.pathname);
     params.append("scope", "user-read-private user-read-email");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
 
-    // Add debug output before redirect
+    // Debug-Ausgabe vor Redirect
     console.log("Redirecting to Spotify with params:", params.toString());
     window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
@@ -22,7 +22,7 @@ export async function getAccessToken(clientId, code) {
     if (!verifier) throw new Error("No verifier found in localStorage");
 
     const params = new URLSearchParams();
-    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Fixed parameter name
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Korrigierter Parametername
     params.append("grant_type", "authorization_code");
     params.append("code", code);
     params.append("redirect_uri", window.location.origin + window.location.pathname);
@@ -38,7 +38,7 @@ export async function getAccessToken(clientId, code) {
             body: params
         });
 
-        // Enhanced error handling
+        // Verbesserte Fehlerbehandlung
         if (!result.ok) {
             const errorBody = await result.text();
             console.error("Token request failed:", {
@@ -58,7 +58,7 @@ export async function getAccessToken(clientId, code) {
     }
 }
 
-// Helper functions remain the same
+// Helper functions bleiben gleich
 function generateCodeVerifier(length) {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
