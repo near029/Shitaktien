@@ -12,14 +12,14 @@ export async function redirectToAuthCodeFlow(clientId) {
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
 
-    window.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 export async function getAccessToken(clientId, code) {
     const verifier = localStorage.getItem("verifier");
 
     const params = new URLSearchParams();
-    params.append("client_id", clientId);
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);
     params.append("grant_type", "authorization_code");
     params.append("code", code);
     params.append("redirect_uri", window.location.origin + window.location.pathname);
