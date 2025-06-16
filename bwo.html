@@ -511,6 +511,16 @@ function getAxisColor() {
       `;
     }
 
+try {
+  const accessToken = await getAccessToken(clientId, code);
+  console.log("Token:", accessToken); // Verify token exists
+} catch (err) {
+  console.error("Token error:", err); // Check this output
+}
+
+
+
+  
     // Initialize when page loads
     init();
 </script>
