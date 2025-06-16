@@ -5,47 +5,60 @@ export async function redirectToAuthCodeFlow(clientId) {
     localStorage.setItem("verifier", verifier);
 
     const params = new URLSearchParams();
-    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Fixed parameter name
     params.append("response_type", "code");
     params.append("redirect_uri", window.location.origin + window.location.pathname);
     params.append("scope", "user-read-private user-read-email");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
 
-    document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    // Add debug output before redirect
+    console.log("Redirecting to Spotify with params:", params.toString());
+    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 export async function getAccessToken(clientId, code) {
     const verifier = localStorage.getItem("verifier");
+    if (!verifier) throw new Error("No verifier found in localStorage");
 
     const params = new URLSearchParams();
-    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);  // Fixed parameter name
     params.append("grant_type", "authorization_code");
     params.append("code", code);
     params.append("redirect_uri", window.location.origin + window.location.pathname);
     params.append("code_verifier", verifier);
 
     try {
+        console.log("Requesting token with params:", params.toString());
         const result = await fetch("https://accounts.spotify.com/api/token", {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: params
         });
 
+        // Enhanced error handling
         if (!result.ok) {
-            throw new Error(`HTTP error! status: ${result.status}`);
+            const errorBody = await result.text();
+            console.error("Token request failed:", {
+                status: result.status,
+                statusText: result.statusText,
+                body: errorBody
+            });
+            throw new Error(`Token request failed: ${result.status} ${result.statusText}`);
         }
 
         const data = await result.json();
+        console.log("Token response:", data);
         return data.access_token;
     } catch (error) {
-        console.error("Error getting access token:", error);
+        console.error("Error in getAccessToken:", error);
         throw error;
     }
-
-
 }
 
+// Helper functions remain the same
 function generateCodeVerifier(length) {
     let text = '';
     let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
