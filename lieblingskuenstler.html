@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lieblingskünstler</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --spotify-green: #1DB954;
+      --spotify-light: #1ed760;
+      --dark-bg: #121212;
+      --dark-card: #181818;
+      --light-bg: #f9f9f9;
+      --light-card: #fff;
+      --light-text: #333;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--spotify-green);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: var(--dark-card);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.7);
+      z-index: 1100;
+    }
+
+    .sidebar h2 {
+      color: var(--spotify-green);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar a,
+    .sidebar button {
+      color: var(--spotify-green);
+      background: transparent;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      text-align: left;
+      border-radius: 0.3rem;
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      flex: 1;
+    }
+
+    h1, h2 {
+      color: var(--spotify-green);
+    }
+
+    .card {
+      background-color: var(--dark-card);
+      border: none;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card p, .card li {
+      color: var(--spotify-green);
+    }
+
+    .icon {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
+
+    a.btn-back {
+      margin-bottom: 2rem;
+      color: var(--spotify-green);
+      border-color: var(--spotify-green);
+    }
+
+    a.btn-back:hover {
+      background-color: var(--spotify-green);
+      color: var(--dark-bg);
+    }
+
+    #darkModeToggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: var(--spotify-green);
+      border: none;
+      color: black;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1200;
+    }
+
+    body.light-mode {
+      background-color: var(--light-bg);
+      color: var(--light-text);
+    }
+
+    body.light-mode .card {
+      background-color: var(--light-card);
+    }
+
+    body.light-mode h1,
+    body.light-mode h2 {
+      color: var(--spotify-green);
+    }
+
+    body.light-mode a {
+      color: var(--spotify-green);
+    }
+
+    body.light-mode a:hover {
+      color: var(--spotify-light);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="darkModeToggle" aria-label="Dark Mode umschalten">🌞</button>
+
+  <nav class="sidebar" aria-label="Navigation">
+    <h2>Menü</h2>
+    <a href="lieblingskuenstler.html">🎵 Lieblingskünstler</a>
+    <a href="genretrends.html">📈 Genre-Trends</a>
+    <a href="#">⏱ Hörgewohnheiten</a>
+    <a href="#">📂 Datenexport</a>
+  </nav>
+
+  <main class="main-content">
+    <a href="index.html" class="btn btn-outline-light btn-back">
+      <i class="bi bi-arrow-left"></i> Zurück zur Startseite
+    </a>
+
+    <h1><i class="bi bi-person-fill icon"></i>Deine Top-Künstler</h1>
+
+    <div class="card">
+      <h2><i class="bi bi-star-fill icon"></i>Top 5 Künstler</h2>
+      <ul>
+        <li>The Weeknd</li>
+        <li>Beyoncé</li>
+        <li>Drake</li>
+        <li>Arctic Monkeys</li>
+        <li>Hans Zimmer</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><i class="bi bi-bar-chart-line-fill icon"></i>Hörverlauf (Beispiel)</h2>
+      <canvas id="artistChart" aria-label="Chart über Lieblingskünstler" role="img"></canvas>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Dark Mode Toggle
+    const toggleBtn = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    if (localStorage.getItem('darkMode') === 'off') {
+      body.classList.add('light-mode');
+      toggleBtn.textContent = '🌙';
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        localStorage.setItem('darkMode', 'on');
+        toggleBtn.textContent = '🌞';
+      } else {
+        body.classList.add('light-mode');
+        localStorage.setItem('darkMode', 'off');
+        toggleBtn.textContent = '🌙';
+      }
+    });
+
+    // Chart.js Künstler-Verlauf
+    const ctx = document.getElementById('artistChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai'],
+        datasets: [{
+          label: 'The Weeknd',
+          data: [10, 14, 12, 18, 20],
+          borderColor: '#1DB954',
+          backgroundColor: 'rgba(29,185,84,0.2)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: body.classList.contains('light-mode') ? '#363636' : '#1DB954'
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: body.classList.contains('light-mode') ? '#363636' : '#1DB954'
+            }
+          },
+          y: {
+            ticks: {
+              color: body.classList.contains('light-mode') ? '#363636' : '#1DB954'
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
