@@ -1,60 +1,31 @@
-// Hilfsfunktionen wie bisher: generateCodeVerifier, generateCodeChallenge
+ const CLIENT_ID = '5db2bd0986654ef98bff31892d4f818f'; // <--- HIER DEINE CLIENT ID EINFÜGEN
+    const REDIRECT_URI = window.location.href;
+    const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
+    const RESPONSE_TYPE = 'token';
+    const SCOPES = 'user-top-read';
 
-async function redirectToAuthCodeFlow(clientId) {
-  const verifier = generateCodeVerifier(128);
-  const challenge = await generateCodeChallenge(verifier);
-  localStorage.setItem('pkce_verifier', verifier);
+    function loginWithSpotify() {
+      const authUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`;
+      window.location = authUrl;
+    }
 
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: clientId,
-    redirect_uri: window.location.origin + window.location.pathname,
-    scope: 'user-top-read user-read-private',
-    code_challenge_method: 'S256',
-    code_challenge: challenge,
-  });
-
-  window.location.href = `https://accounts.spotify.com/authorize?${params}`;
-}
-
-async function getAccessToken(clientId, code) {
-  const verifier = localStorage.getItem('pkce_verifier');
-  const params = new URLSearchParams({
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: window.location.origin + window.location.pathname,
-    client_id: clientId,
-    code_verifier: verifier,
-  });
-
-  const res = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params
-  });
-  if (!res.ok) throw new Error(`Token-Request failed: ${res.status}`);
-  const data = await res.json();
-  return data.access_token;
-}
-(async () => {
-  const clientId = '5db2bd0986654ef98bff31892d4f818f'; // hier eintragen
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-
-  if (!code) {
-    redirectToAuthCodeFlow(clientId);
-  } else {
-    const accessToken = await getAccessToken(clientId, code);
-    console.log('Access Token:', accessToken);
-    fetchTopArtists(accessToken);
-  }
-})();
-async function fetchTopArtists(token) {
-  const res = await fetch('https://api.spotify.com/v1/me/top/artists?limit=10&time_range=medium_term', {
-    headers: { Authorization: 'Bearer ' + token }
-  });
-  if (!res.ok) throw new Error('API‑Request failed: ' + res.status);
-  const data = await res.json();
-
-  console.log('Deine Top-Künstler:', data.items.map(a => a.name));
-}
+    // Wenn ein Token in der URL ist (nach Login)
+    window.onload = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const token = new URLSearchParams(hash.substring(1)).get('access_token');
+        fetch('https://api.spotify.com/v1/me/top/artists?limit=5', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          const output = document.getElementById('output');
+          output.innerHTML = '<h2>Deine Top 5 Künstler:</h2>';
+          data.items.forEach((artist, index) => {
+            output.innerHTML += `<p>${index + 1}. ${artist.name}</p>`;
+          });
+        });
+      }
+    }
