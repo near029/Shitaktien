@@ -5,7 +5,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
     localStorage.setItem("verifier", verifier);
 
     const params = new URLSearchParams();
-    params.append("client_id", clientId);
+    params.append("5db2bd0986654ef98bff31892d4f818f", clientId);
     params.append("response_type", "code");
     params.append("redirect_uri", "https://near029.github.io/Shitaktien/bwo.html");
     params.append("scope", "user-read-private user-read-email");
