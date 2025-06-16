@@ -340,9 +340,134 @@
       genreChart.data.datasets[0].data = data.counts;
       genreChart.update();
     });
+    // Hilfsfunktionen PKCE
+function generateCodeVerifier(length = 128) {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function generateCodeChallenge(verifier) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const base64Digest = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return base64Digest;
+}
+
+// OAuth2 PKCE Flow starten
+async function redirectToAuthCodeFlow(clientId) {
+  const verifier = generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  localStorage.setItem('pkce_verifier', verifier);
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: window.location.origin + window.location.pathname,
+    scope: 'user-top-read user-read-private',
+    code_challenge_method: 'S256',
+    code_challenge: challenge,
+  });
+
+  window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+}
+
+// Access Token holen
+async function getAccessToken(clientId, code) {
+  const verifier = localStorage.getItem('pkce_verifier');
+  const params = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: window.location.origin + window.location.pathname,
+    client_id: clientId,
+    code_verifier: verifier,
+  });
+
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  if (!res.ok) throw new Error(`Token-Request failed: ${res.status}`);
+  const data = await res.json();
+  return data.access_token;
+}
+
+// Lieblingskünstler laden und anzeigen
+async function fetchTopArtists(token) {
+  const res = await fetch('https://api.spotify.com/v1/me/top/artists?limit=10&time_range=medium_term', {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!res.ok) throw new Error('API‑Request failed: ' + res.status);
+  const data = await res.json();
+
+  // Container auswählen
+  const container = document.getElementById('playlist-container');
+  container.innerHTML = ''; // Clear Loading Text
+
+  // Künstler als Liste anzeigen
+  const ul = document.createElement('ul');
+  ul.className = 'list-group list-group-flush';
+
+  data.items.forEach(artist => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item bg-transparent text-success d-flex align-items-center gap-3';
+
+    // Bild (klein)
+    if (artist.images?.length) {
+      const img = document.createElement('img');
+      img.src = artist.images[2]?.url || artist.images[0].url;
+      img.alt = artist.name;
+      img.style.width = '48px';
+      img.style.height = '48px';
+      img.style.borderRadius = '50%';
+      li.appendChild(img);
+    }
+
+    // Name und Link
+    const a = document.createElement('a');
+    a.href = artist.external_urls.spotify;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = artist.name;
+    a.style.color = 'var(--spotify-green)';
+    a.style.textDecoration = 'none';
+    a.style.fontWeight = '600';
+
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+
+  container.appendChild(ul);
+}
+
+// Hauptfunktion beim Laden der Seite
+(async () => {
+  const clientId = '5db2bd0986654ef98bff31892d4f818f'; // dein Client ID
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+
+  try {
+    if (!code) {
+      // Kein Code -> Login starten
+      redirectToAuthCodeFlow(clientId);
+    } else {
+      // Code da -> Token holen und Daten anzeigen
+      const accessToken = await getAccessToken(clientId, code);
+      // Optional: Code aus URL entfernen, damit nicht nochmal eingeloggt wird
+      window.history.replaceState({}, document.title, window.location.pathname);
+      fetchTopArtists(accessToken);
+    }
+  } catch (e) {
+    document.getElementById('playlist-container').textContent = 'Fehler beim Laden der Daten: ' + e.message;
+    console.error(e);
+  }
+})();
+
   </script>
-  <script src="a.js"></script>
-  <script type="module" src="authCodeWithPkce.js"></script>
 </body>
 </html>
         }
