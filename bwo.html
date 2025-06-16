@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meine Spotify Auswertung</title>
 
-  <!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS für Layout und Komponenten -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
-  <!-- Chart.js & DataLabels Plugin -->
+  <!-- Chart.js für Diagramme + DataLabels Plugin für Balkenbeschriftung -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
   <style>
+    /* Farbdefinitionen als CSS-Variablen für Dunkel- und Hellmodus */
     :root {
       --spotify-green: #1DB954;
       --spotify-light: #1ed760;
@@ -23,16 +24,20 @@
       --light-card: #fff;
       --light-text: #333;
     }
+
+    /* Standard-Layout */
     body {
       background-color: var(--dark-bg);
       color: var(--spotify-green);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      transition: background-color 0.3s, color 0.3s;
       display: flex;
       min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
     }
+
+    /* Linke Sidebar-Navigation */
     .sidebar {
       position: fixed;
       top: 0;
@@ -47,141 +52,185 @@
       box-shadow: 2px 0 8px rgba(0,0,0,0.7);
       z-index: 1100;
     }
+
+    /* Sidebar-Text */
     .sidebar h2 {
       color: var(--spotify-green);
+      font-size: 1.25rem;
       margin-bottom: 1rem;
       font-weight: 700;
-      font-size: 1.25rem;
-      user-select: none;
     }
+
+    /* Sidebar Links, Buttons, Dropdown */
     .sidebar a,
     .sidebar button,
     .sidebar select {
-      color: var(--spotify-green);
       background: transparent;
+      color: var(--spotify-green);
       border: none;
-      cursor: pointer;
       font-size: 1rem;
       text-align: left;
-      width: 100%;
       padding: 0.5rem 0;
+      cursor: pointer;
       border-radius: 0.3rem;
       transition: background-color 0.2s;
     }
+
+    /* Hover-Effekt */
     .sidebar a:hover,
     .sidebar button:hover,
     .sidebar select:hover {
       background-color: var(--spotify-green);
       color: var(--dark-bg);
-      text-decoration: none;
     }
+
+    /* Dropdown-Stil */
     .sidebar select {
-      color: var(--spotify-green);
-      background-color: transparent;
       border: 1px solid var(--spotify-green);
       padding: 0.4rem;
       border-radius: 0.3rem;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
     }
+
+    /* Hauptinhalt rechts der Sidebar */
     .main-content {
       margin-left: 250px;
       padding: 2rem;
       flex: 1;
     }
+
+    /* Überschriften-Stil */
     h1, h2, h3 {
       color: var(--spotify-green);
     }
+
+    /* Kartenboxen (z.B. mit Text oder Charts) */
     .card {
       background-color: var(--dark-card);
       border: none;
       border-radius: 1rem;
       transition: transform 0.3s ease, background-color 0.3s;
     }
+
     .card p, .card li {
       color: var(--spotify-green);
     }
+
     .card:hover {
       transform: scale(1.02);
     }
+
+    /* Zurück-Link oben */
     a.btn-back {
       margin-bottom: 2rem;
       color: var(--spotify-green);
       border-color: var(--spotify-green);
     }
+
     a.btn-back:hover {
       background-color: var(--spotify-green);
       color: var(--dark-bg);
-      text-decoration: none;
     }
+
+    /* Einblendeffekt */
     .fade-in {
       animation: fadeIn 1s ease-in;
     }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px);}
       to   { opacity: 1; transform: translateY(0);}
     }
+
+    /* Spotify-Icon vor Listenpunkten */
     ul li::before { content: "🎧 "; }
+
+    /* Icons z. B. bei h1/h2 */
     .icon {
       font-size: 1.5rem;
       color: var(--spotify-green);
       margin-right: 0.5rem;
     }
-    a {
-      color: var(--spotify-green);
-      transition: color 0.3s;
-    }
-    a:hover { color: var(--spotify-light);}
+
+    /* Linkfarben */
+    a { color: var(--spotify-green); }
+    a:hover { color: var(--spotify-light); }
+
+    /* Button zum Umschalten zwischen Dark-/Light-Mode */
     #darkModeToggle {
       position: fixed;
       top: 1rem;
       right: 1rem;
       background-color: var(--spotify-green);
-      border: none;
       color: black;
-      padding: 0.5rem 1rem;
+      border: none;
       border-radius: 9999px;
+      padding: 0.5rem 1rem;
       cursor: pointer;
       font-weight: bold;
       z-index: 1150;
-      transition: background-color 0.3s;
     }
-    #darkModeToggle:hover { background-color: var(--spotify-light);}
+
+    #darkModeToggle:hover {
+      background-color: var(--spotify-light);
+    }
+
+    /* Light Mode Styles */
     body.light-mode {
       background-color: var(--light-bg);
       color: var(--light-text);
     }
-    body.light-mode h1, body.light-mode h2, body.light-mode h3 {
-      color: var(--spotify-green);
-    }
+
     body.light-mode .card {
       background-color: var(--light-card);
       border: 2px solid #556B2F;
     }
-    body.light-mode .card p, body.light-mode .card li {
+
+    body.light-mode h1, body.light-mode h2, body.light-mode h3,
+    body.light-mode .card p,
+    body.light-mode .card li,
+    body.light-mode a {
       color: var(--spotify-green);
     }
-    body.light-mode a { color: var(--spotify-green);}
-    body.light-mode a:hover { color: var(--spotify-light);}
+
+    /* Responsives Verhalten bei kleinen Bildschirmen */
     @media (max-width: 768px) {
-      .sidebar { position: relative; width: 100%; height: auto; box-shadow: none; padding: 1rem 1rem 1rem 1rem; flex-direction: row; gap: 1rem; overflow-x: auto;}
-      .sidebar h2 { display: none;}
-      .sidebar a, .sidebar button, .sidebar select { flex: 1 0 auto; text-align: center; padding: 0.5rem;}
-      .main-content { margin-left: 0; padding: 1rem;}
+      .sidebar {
+        position: relative;
+        width: 100%;
+        flex-direction: row;
+        padding: 1rem;
+        overflow-x: auto;
+        height: auto;
+        box-shadow: none;
+      }
+      .sidebar h2 {
+        display: none;
+      }
+      .sidebar a, .sidebar button, .sidebar select {
+        flex: 1 0 auto;
+        text-align: center;
+        padding: 0.5rem;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
     }
   </style>
 </head>
+
 <body>
-  <!-- Dark Mode Toggle -->
+  <!-- Button für Dark-/Light-Mode -->
   <button id="darkModeToggle" aria-label="Toggle Dark Mode">🌞</button>
 
-  <!-- Sidebar -->
+  <!-- Linke Navigation -->
   <nav class="sidebar" aria-label="Hauptnavigation">
     <h2>Menü</h2>
-    <a href="lieblingskuenstler.html" tabindex="0">🎵 Lieblingskünstler</a>
-    <a href="genre-trends.html" tabindex="0">📈 Genre-Trends</a>
-    <a href="#" tabindex="0">⏱ Hörgewohnheiten</a>
+    <a href="lieblingskuenstler.html">🎵 Lieblingskünstler</a>
+    <a href="genre-trends.html">📈 Genre-Trends</a>
+    <a href="#">⏱ Hörgewohnheiten</a>
+
+    <!-- Filter-Dropdown -->
     <select id="genreFilter" aria-label="Genre Filter" title="Genre auswählen">
       <option value="all" selected>Alle Genres</option>
       <option value="pop">Pop</option>
@@ -197,21 +246,22 @@
     <a href="index.html" class="btn btn-outline-light btn-back">
       <i class="bi bi-arrow-left"></i> Zurück zur Startseite
     </a>
-    <h1 class="mb-4">
-      <i class="bi bi-graph-up-arrow icon"></i>Erweiterte Spotify Auswertung
-    </h1>
+    <h1><i class="bi bi-graph-up-arrow icon"></i> Erweiterte Spotify Auswertung</h1>
+
+    <!-- Platzhaltertext für zukünftige Inhalte -->
     <div id="playlist-container">Loading playlists...</div>
+
     <div class="row g-4">
+      <!-- Hinweistext: Bereich ist in Vorbereitung -->
       <div class="col-md-6">
         <div class="card p-4">
-          <h2 class="mb-3"><i class="bi bi-hourglass-split icon"></i>Analyse kommt bald...</h2>
-          <p>
-            Hier kannst du später detaillierte Informationen zu deinem Musikgeschmack,
-            deinen Hörzeiten, Genres, Lieblingskünstlern, Track-Verlauf und vielem mehr sehen.
-          </p>
+          <h2><i class="bi bi-hourglass-split icon"></i>Analyse kommt bald...</h2>
+          <p>Hier kannst du später detaillierte Informationen sehen.</p>
           <p><em>Diese Seite ist aktuell in Vorbereitung.</em></p>
         </div>
       </div>
+
+      <!-- Ideenliste für mögliche Analysen -->
       <div class="col-md-6">
         <div class="card p-4">
           <h3><i class="bi bi-lightbulb icon"></i>Ideen für Inhalte:</h3>
@@ -224,32 +274,34 @@
         </div>
       </div>
     </div>
-    <!-- Chart Bereich -->
+
+    <!-- Bereich für Chart.js Balkendiagramm -->
     <div class="row mt-5">
       <div class="col-12 col-md-8 offset-md-2">
         <div class="card p-4">
-          <h3 class="mb-4"><i class="bi bi-bar-chart icon"></i>Häufig gehörte Genres</h3>
+          <h3><i class="bi bi-bar-chart icon"></i>Häufig gehörte Genres</h3>
           <canvas id="genreChart" aria-label="Chart über häufig gehörte Genres" role="img"></canvas>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Bootstrap JS Bundle -->
+  <!-- Bootstrap JavaScript Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Main Script für Chart und DarkMode -->
+  <!-- Eigene Skripte -->
   <script type="module">
-    // Dark Mode Toggle
+    // DARK MODE LOGIK
     const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
 
-    // Prüfen ob Dark Mode gespeichert ist (localStorage)
+    // Überprüfe vorherige Einstellung aus localStorage
     if (localStorage.getItem('darkMode') === 'off') {
       body.classList.add('light-mode');
       darkModeToggle.textContent = '🌙';
     }
 
+    // Umschalten bei Klick
     darkModeToggle.addEventListener('click', () => {
       if (body.classList.contains('light-mode')) {
         body.classList.remove('light-mode');
@@ -262,17 +314,17 @@
       }
     });
 
-    // Beispiel-Daten für Chart.js
+    // Beispiel-Daten für Balkendiagramm nach Genre
     const genresData = {
-      all:   { labels: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Klassik'], counts: [40, 25, 15, 10, 10] },
-      pop:   { labels: ['Pop 1', 'Pop 2', 'Pop 3'], counts: [15, 10, 15] },
-      rock:  { labels: ['Rock 1', 'Rock 2', 'Rock 3'], counts: [10, 8, 7] },
-      hiphop:{ labels: ['Hip-Hop 1', 'Hip-Hop 2'], counts: [9, 6] },
-      electronic:{ labels: ['Electronic 1', 'Electronic 2', 'Electronic 3'], counts: [5, 3, 2] },
+      all: { labels: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Klassik'], counts: [40, 25, 15, 10, 10] },
+      pop: { labels: ['Pop 1', 'Pop 2', 'Pop 3'], counts: [15, 10, 15] },
+      rock: { labels: ['Rock 1', 'Rock 2', 'Rock 3'], counts: [10, 8, 7] },
+      hiphop: { labels: ['Hip-Hop 1', 'Hip-Hop 2'], counts: [9, 6] },
+      electronic: { labels: ['Electronic 1', 'Electronic 2', 'Electronic 3'], counts: [5, 3, 2] },
       classical: { labels: ['Klassik 1', 'Klassik 2'], counts: [6, 4] },
     };
 
-    // Chart initialisieren mit DataLabels und spotify-grün für alle Zahlen!
+    // Diagramm initialisieren
     const ctx = document.getElementById('genreChart').getContext('2d');
     let genreChart = new Chart(ctx, {
       type: 'bar',
@@ -294,44 +346,38 @@
           y: {
             beginAtZero: true,
             ticks: {
-              color: '#1DB954', // Spotify-Grün für Y-Achsen-Zahlen
+              color: '#1DB954',
               stepSize: 5,
             },
-            grid: {
-              color: '#333',
-            },
+            grid: { color: '#333' },
           },
           x: {
-            ticks: {
-              color: '#1DB954', // Spotify-Grün für X-Achsen-Zahlen
-            },
-            grid: {
-              color: 'transparent',
-            },
+            ticks: { color: '#1DB954' },
+            grid: { color: 'transparent' },
           },
         },
         plugins: {
           datalabels: {
-            color: '#1DB954',       // Spotify-Grün für Zahlen auf den Balken
+            color: '#1DB954',
             font: { weight: 'bold', size: 14 }
           },
           legend: {
             labels: {
-              color: '#1DB954',     // Spotify-Grün für Legende
-              font: { size: 14 },
+              color: '#1DB954',
+              font: { size: 14 }
             },
           },
           tooltip: {
             backgroundColor: '#222',
-            titleColor: '#1DB954',  // Spotify-Grün im Tooltip
-            bodyColor: '#1DB954',   // Spotify-Grün im Tooltip
+            titleColor: '#1DB954',
+            bodyColor: '#1DB954',
           },
         },
       },
-      plugins: [ChartDataLabels], // DataLabels-Plugin aktivieren!
+      plugins: [ChartDataLabels],
     });
 
-    // Genre Filter Listener
+    // Genre-Dropdown Event-Listener
     const genreFilter = document.getElementById('genreFilter');
     genreFilter.addEventListener('change', () => {
       const selected = genreFilter.value;
@@ -341,8 +387,9 @@
       genreChart.update();
     });
   </script>
+
+  <!-- Weitere JS-Module (z. B. Authentifizierung, Spotify-API) -->
   <script src="a.js"></script>
   <script type="module" src="authCodeWithPkce.js"></script>
 </body>
 </html>
-</script>
